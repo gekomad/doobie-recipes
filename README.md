@@ -7,7 +7,18 @@
 </tr>    
 </table>    
     
-    
+
+```
+wget https://raw.githubusercontent.com/tpolecat/doobie/series/0.5.x/world.sql
+sudo su postgres
+psql -c "ALTER USER postgres  WITH PASSWORD 'pass1';"
+psql -c 'create database world;' -U postgres
+psql -c '\i world.sql' -d world -U postgres
+psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres
+
+```
+
 ### run test:    
       
     sbt test
+

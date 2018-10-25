@@ -9,17 +9,7 @@ import org.scalatest.FunSuite
 
 import scala.collection.immutable
 
-/* https://tpolecat.github.io/doobie/docs/01-Introduction.html
-$ curl -O https://raw.githubusercontent.com/tpolecat/doobie/series/0.5.x/world.sql
-$ psql -c 'create user postgres WITH ENCRYPTED PASSWORD 'pass1';'
-$ psql -c 'create database world;' -U postgres
-$ psql -c '\i world.sql' -d world -U postgres
-$ psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres
-
-* */
-
 class Test1 extends FunSuite {
-
 
   import scala.concurrent.ExecutionContext
 
