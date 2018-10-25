@@ -1,30 +1,12 @@
-
-import doobie._
-import doobie.implicits._
-import cats._
 import cats.effect._
-import cats.free.Free
-import cats.implicits._
+import doobie.implicits._
 import org.scalatest.FunSuite
 
 import scala.collection.immutable
 
-class Test1 extends FunSuite {
+class SelectingData extends FunSuite {
 
-  import scala.concurrent.ExecutionContext
-
-  // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
-  // is where nonblocking operations will be executed.
-  implicit val cs = IO.contextShift(ExecutionContext.global)
-
-  // A transactor that gets connections from java.sql.DriverManager and excutes blocking operations
-  // on an unbounded pool of daemon threads. See the chapter on connection handling for more info.
-  val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", // driver classname
-    "jdbc:postgresql:world", // connect URL (driver-specific)
-    "postgres", // user
-    "pass1" // password
-  )
+  import Predef.xa
 
   test("select 1 column") {
 
