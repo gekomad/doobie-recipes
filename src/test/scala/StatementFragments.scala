@@ -4,9 +4,9 @@ import scala.collection.immutable
 
 class StatementFragments extends FunSuite {
 
-  import Predef.xa
+  import MyPredef.xa
 
-  test("select 1 column") {
+  test("select with fragments") {
     import cats.implicits._
 
     import doobie._, doobie.implicits._

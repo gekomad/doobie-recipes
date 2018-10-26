@@ -3,7 +3,7 @@ import org.scalatest.FunSuite
 
 class ParameterizedQueries extends FunSuite {
 
-  import Predef.xa
+  import MyPredef.xa
 
   test("bigger than") {
 
@@ -49,7 +49,7 @@ class ParameterizedQueries extends FunSuite {
       .to[List]
       .transact(xa) // IO[List[Country]]
       .unsafeRunSync // List[Country]]
-      .take(2) // List[Country]]
+      .take(2) // List[Country]]ConnectionIO
 
     assert(mySelect == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("PAK", "Pakistan", 156483000, Some(61289.0))))
 

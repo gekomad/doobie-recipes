@@ -6,7 +6,7 @@ import scala.collection.immutable
 
 class SelectingData extends FunSuite {
 
-  import Predef.xa
+  import MyPredef.xa
 
   test("select 1 column") {
 

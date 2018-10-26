@@ -1,8 +1,12 @@
 import cats.effect.IO
 import doobie.Transactor
 
-object Predef {
+object MyPredef {
   import scala.concurrent.ExecutionContext
+
+  import MyPredef.xa
+  import doobie.implicits._
+  import cats.implicits._
 
   // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
   // is where nonblocking operations will be executed.
@@ -16,4 +20,20 @@ object Predef {
     "postgres", // user
     "pass1" // password
   )
+
+  def createTable: Int = {
+    val drop = sql"""DROP TABLE IF EXISTS person""".update.run
+
+    val create =
+      sql"""
+        CREATE TABLE person (
+        id   SERIAL,
+        name VARCHAR NOT NULL UNIQUE,
+        age  SMALLINT
+        )
+      """.update.run
+
+    (drop, create).mapN(_ + _).transact(xa).unsafeRunSync
+
+  }
 }

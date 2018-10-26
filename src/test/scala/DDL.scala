@@ -4,27 +4,12 @@ import scala.collection.immutable
 
 class DDL extends FunSuite {
 
-  import Predef.xa
+  import MyPredef.xa
+  import MyPredef.createTable
   import doobie.implicits._
   import cats.implicits._
 
   case class Person(id: Long, name: String, age: Option[Short])
-
-  def createTable: Int = {
-    val drop = sql"""DROP TABLE IF EXISTS person""".update.run
-
-    val create =
-      sql"""
-        CREATE TABLE person (
-        id   SERIAL,
-        name VARCHAR NOT NULL UNIQUE,
-        age  SMALLINT
-        )
-      """.update.run
-
-    (drop, create).mapN(_ + _).transact(xa).unsafeRunSync
-
-  }
 
   test("insert read update") {
 
