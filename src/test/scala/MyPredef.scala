@@ -7,19 +7,30 @@ object MyPredef {
 
   import doobie.implicits._
   import cats.implicits._
+  import cats.effect._
+  import cats.implicits._
+  import doobie._
+  import doobie.implicits._
+  import doobie.hikari._
 
   // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
   // is where nonblocking operations will be executed.
   implicit val cs = IO.contextShift(ExecutionContext.global)
 
-  // A transactor that gets connections from java.sql.DriverManager and excutes blocking operations
-  // on an unbounded pool of daemon threads. See the chapter on connection handling for more info.
-  val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", // driver classname
-    "jdbc:postgresql:world", // connect URL (driver-specific)
-    "postgres", // user
-    "pass1" // password
-  )
+
+  val transactor: Resource[IO, HikariTransactor[IO]] =
+    for {
+      ce <- ExecutionContexts.fixedThreadPool[IO](32) // our connect EC
+      te <- ExecutionContexts.cachedThreadPool[IO] // our transaction EC
+      xa <- HikariTransactor.newHikariTransactor[IO](
+        "org.postgresql.Driver", // driver classname
+        "jdbc:postgresql:world", // connect URL
+        "postgres", // username
+        "pass1", // password
+        ce, // await connection here
+        te // execute JDBC operations here
+      )
+    } yield xa
 
   def createTablePerson: Int = {
     val drop = sql"""DROP TABLE IF EXISTS person""".update.run
@@ -33,8 +44,9 @@ object MyPredef {
         )
       """.update.run
 
-    (drop, create).mapN(_ + _).transact(xa).unsafeRunSync
-
+    transactor.use { xa =>
+      (drop, create).mapN(_ + _).transact(xa)
+    }.unsafeRunSync
   }
 
   def createTablePersonPets: Int = {
@@ -48,6 +60,9 @@ object MyPredef {
         pets VARCHAR[] NOT NULL
       )
     """.update.run
-    (drop, create).mapN(_ + _).transact(xa).unsafeRunSync
+    transactor.use { xa =>
+      (drop, create).mapN(_ + _).transact(xa)
+    }.unsafeRunSync
+
   }
 }

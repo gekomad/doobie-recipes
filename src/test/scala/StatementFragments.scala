@@ -1,10 +1,9 @@
+import MyPredef.transactor
 import org.scalatest.FunSuite
 
 import scala.collection.immutable
 
 class StatementFragments extends FunSuite {
-
-  import MyPredef.xa
 
   test("select with fragments") {
     import cats.implicits._
@@ -29,9 +28,10 @@ class StatementFragments extends FunSuite {
           whereAndOpt(f1, f2, f3) ++
           fr"LIMIT $limit"
 
-
-      q.query[Info].to[List] // ConnectionIO[List[String]]
-        .transact(xa) // IO[List[String]]
+      transactor.use { xa =>
+        q.query[Info].to[List] // ConnectionIO[List[String]]
+          .transact(xa) // IO[List[String]]
+      }
         .unsafeRunSync // List[String]
         .take(2) // List[Strings]
 

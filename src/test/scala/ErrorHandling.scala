@@ -1,13 +1,11 @@
 
 import doobie.free.connection.ConnectionIO
 import org.scalatest.FunSuite
-import MyPredef.createTablePerson
+import MyPredef.{createTablePerson, transactor}
 
 class ErrorHandling extends FunSuite {
 
   case class Person(id: Int, name: String)
-
-  import MyPredef.xa
 
   test("error Handling") {
 
@@ -27,10 +25,10 @@ class ErrorHandling extends FunSuite {
         case a => a
       }
 
-    val res = safeInsert("bob").transact(xa).unsafeRunSync
+    val res =  transactor.use { xa =>safeInsert("bob").transact(xa)}.unsafeRunSync
     assert(res.isRight && res.getOrElse(???) == Person(1, "bob"))
 
-    assert(safeInsert("bob").transact(xa).unsafeRunSync.isLeft)
+    assert( transactor.use { xa =>safeInsert("bob").transact(xa)}.unsafeRunSync.isLeft)
 
   }
 

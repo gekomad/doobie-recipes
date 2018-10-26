@@ -1,10 +1,10 @@
+import MyPredef.transactor
 import org.scalatest.FunSuite
 
 class SQLArrays extends FunSuite {
 
   import doobie.postgres.implicits._
   import MyPredef.createTablePersonPets
-  import MyPredef.xa
 
   test("SQL Arrays") {
 
@@ -22,8 +22,8 @@ class SQLArrays extends FunSuite {
         .withUniqueGeneratedKeys("id", "name", "pets")
     }
 
-    assert(insert("Bob", List("Nixon", "Slappy")).transact(xa).unsafeRunSync == Person(1, "Bob", List("Nixon", "Slappy")))
-    assert(insert("Alice", List.empty).transact(xa).unsafeRunSync == Person(2, "Alice", List.empty))
+    assert( transactor.use { xa =>insert("Bob", List("Nixon", "Slappy")).transact(xa)}.unsafeRunSync == Person(1, "Bob", List("Nixon", "Slappy")))
+    assert( transactor.use { xa =>insert("Alice", List.empty).transact(xa)}.unsafeRunSync == Person(2, "Alice", List.empty))
 
   }
 
