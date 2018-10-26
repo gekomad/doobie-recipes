@@ -1,49 +1,33 @@
-
-import doobie._
-import doobie.implicits._
-import cats._
 import cats.effect._
-import cats.free.Free
-import cats.implicits._
+import doobie.implicits._
 import org.scalatest.FunSuite
 
 import scala.collection.immutable
 
-class Test1 extends FunSuite {
 
-  import scala.concurrent.ExecutionContext
+class SelectingData extends FunSuite {
 
-  // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
-  // is where nonblocking operations will be executed.
-  implicit val cs = IO.contextShift(ExecutionContext.global)
-
-  // A transactor that gets connections from java.sql.DriverManager and excutes blocking operations
-  // on an unbounded pool of daemon threads. See the chapter on connection handling for more info.
-  val xa = Transactor.fromDriverManager[IO](
-    "org.postgresql.Driver", // driver classname
-    "jdbc:postgresql:world", // connect URL (driver-specific)
-    "postgres", // user
-    "pass1" // password
-  )
+  import MyPredef.transactor
 
   test("select 1 column") {
+    val mySelect: IO[List[String]] = transactor.use { xa =>
+      sql"select name from country"
+        .query[String] // Query0[String]
+        .to[List] // ConnectionIO[List[String]]
+        .transact(xa) // IO[List[String]]
+    }
 
-    val mySelect: Seq[String] = sql"select name from country"
-      .query[String] // Query0[String]
-      .to[List] // ConnectionIO[List[String]]
-      .transact(xa) // IO[List[String]]
-      .unsafeRunSync // List[String]
-      .take(3) // List[String]
-
-    assert(mySelect == List("Afghanistan", "Netherlands", "Netherlands Antilles"))
+    assert(mySelect.unsafeRunSync.take(3) == List("Afghanistan", "Netherlands", "Netherlands Antilles"))
   }
 
   test("select multiple columns") {
 
-    val mySelect: immutable.Seq[(String, String, Int, Option[Double])] = sql"select code, name, population, gnp from country"
-      .query[(String, String, Int, Option[Double])]
-      .to[List] // ConnectionIO[List[(String, String, Int, Option[Double])]]
-      .transact(xa) // IO[List[(String, String, Int, Option[Double])]]
+    val mySelect: immutable.Seq[(String, String, Int, Option[Double])] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[(String, String, Int, Option[Double])]
+        .to[List] // ConnectionIO[List[(String, String, Int, Option[Double])]]
+        .transact(xa) // IO[List[(String, String, Int, Option[Double])]]
+    }
       .unsafeRunSync // List[(String, String, Int, Option[Double])]
       .take(3) // List[(String, String, Int, Option[Double])]
 
@@ -53,10 +37,12 @@ class Test1 extends FunSuite {
   test("row mappings") {
     import shapeless._
 
-    val mySelect: immutable.Seq[String :: String :: Int :: Option[Double] :: HNil] = sql"select code, name, population, gnp from country"
-      .query[String :: String :: Int :: Option[Double] :: HNil]
-      .to[List] // ConnectionIO[List[String :: String :: Int :: Option[Double] :: HNil]]
-      .transact(xa) // IO[List[String :: String :: Int :: Option[Double] :: HNil]]
+    val mySelect: immutable.Seq[String :: String :: Int :: Option[Double] :: HNil] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[String :: String :: Int :: Option[Double] :: HNil]
+        .to[List] // ConnectionIO[List[String :: String :: Int :: Option[Double] :: HNil]]
+        .transact(xa) // IO[List[String :: String :: Int :: Option[Double] :: HNil]]
+    }
       .unsafeRunSync // List[String :: String :: Int :: Option[Double] :: HNil]]
       .take(3) // List[String :: String :: Int :: Option[Double] :: HNil]]
 
@@ -70,10 +56,12 @@ class Test1 extends FunSuite {
 
     type Rec = Record.`'code -> String, 'name -> String, 'pop -> Int, 'gnp -> Option[Double]`.T
 
-    val mySelect: Seq[Rec] = sql"select code, name, population, gnp from country"
-      .query[Rec]
-      .to[List] // ConnectionIO[List[String :: String :: Int :: Option[Double] :: HNil]]
-      .transact(xa) // IO[List[String :: String :: Int :: Option[Double] :: HNil]]
+    val mySelect: Seq[Rec] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[Rec]
+        .to[List] // ConnectionIO[List[String :: String :: Int :: Option[Double] :: HNil]]
+        .transact(xa) // IO[List[String :: String :: Int :: Option[Double] :: HNil]]
+    }
       .unsafeRunSync // List[String :: String :: Int :: Option[Double] :: HNil]]
       .take(3) // List[String :: String :: Int :: Option[Double] :: HNil]]
 
@@ -85,10 +73,12 @@ class Test1 extends FunSuite {
 
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
-    val mySelect: immutable.Seq[Country] = sql"select code, name, population, gnp from country"
-      .query[Country]
-      .to[List] // ConnectionIO[List[Country]]
-      .transact(xa) // IO[List[Country]]
+    val mySelect: immutable.Seq[Country] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[Country]
+        .to[List] // ConnectionIO[List[Country]]
+        .transact(xa) // IO[List[Country]]
+    }
       .unsafeRunSync // List[Country]]
       .take(3) // List[Country]]
 
@@ -100,10 +90,12 @@ class Test1 extends FunSuite {
     case class Code(code: String)
     case class Country(name: String, pop: Int, gnp: Option[Double])
 
-    val mySelect: Seq[(Code, Country)] = sql"select code, name, population, gnp from country"
-      .query[(Code, Country)]
-      .to[List] // ConnectionIO[List[(Code, Country)]]
-      .transact(xa) // IO[List[(Code, Country)]]
+    val mySelect: Seq[(Code, Country)] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[(Code, Country)]
+        .to[List] // ConnectionIO[List[(Code, Country)]]
+        .transact(xa) // IO[List[(Code, Country)]]
+    }
       .unsafeRunSync // List[(Code, Country)]]
       .take(3) // List[(Code, Country)]]
 
@@ -115,10 +107,12 @@ class Test1 extends FunSuite {
     case class Code(code: String)
     case class Country(name: String, pop: Int, gnp: Option[Double])
 
-    val mySelect: Map[Code, Country] = sql"select code, name, population, gnp from country"
-      .query[(Code, Country)]
-      .to[List] // ConnectionIO[List[(Code, Country)]]
-      .transact(xa) // IO[List[(Code, Country)]]
+    val mySelect: Map[Code, Country] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[(Code, Country)]
+        .to[List] // ConnectionIO[List[(Code, Country)]]
+        .transact(xa) // IO[List[(Code, Country)]]
+    }
       .map(_.toMap) //IO[Map[Code, Country]]
       .unsafeRunSync // IO[Map[Code, Country]]
       .take(3) // IO[Map[Code, Country]]
@@ -130,12 +124,14 @@ class Test1 extends FunSuite {
 
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
-    val mySelect: fs2.Stream[IO, Country] = sql"select code, name, population, gnp from country"
-      .query[Country]
-      .stream
-      .transact(xa)
+    val mySelect = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[Country]
+        .to[List]
+        .transact(xa)
+    }
 
-    val o: immutable.Seq[Country] = mySelect.take(3).compile.toList.unsafeRunSync
+    val o: immutable.Seq[Country] = mySelect.unsafeRunSync.take(3)
 
     assert(o == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
   }
