@@ -5,7 +5,7 @@ import scala.collection.immutable
 class DDL extends FunSuite {
 
   import MyPredef.xa
-  import MyPredef.createTable
+  import MyPredef.createTablePerson
   import doobie.implicits._
   import cats.implicits._
 
@@ -14,7 +14,7 @@ class DDL extends FunSuite {
   test("insert read update") {
 
     //create table
-    assert(createTable == 0)
+    assert(createTablePerson == 0)
 
     //insert
     import doobie.util.update.Update0
@@ -54,7 +54,7 @@ class DDL extends FunSuite {
 
   test("insert and read class Person") {
     //create table
-    assert(createTable == 0)
+    assert(createTablePerson == 0)
 
     def insertAndRead(name: String, age: Option[Short]): ConnectionIO[Person] = {
       sql"insert into person (name, age) values ($name, $age)"
@@ -69,7 +69,7 @@ class DDL extends FunSuite {
 
   test("insert and read id") {
     //create table
-    assert(createTable == 0)
+    assert(createTablePerson == 0)
 
     def insertAndReadId(name: String, age: Option[Short]): ConnectionIO[Int] = {
       sql"insert into person (name, age) values ($name, $age)"
@@ -85,7 +85,7 @@ class DDL extends FunSuite {
 
   test("batch") {
     //create table
-    assert(createTable == 0)
+    assert(createTablePerson == 0)
 
     import doobie.util.update.Update
     type PersonInfo = (String, Option[Short])
@@ -107,7 +107,7 @@ class DDL extends FunSuite {
   test("batch and return List[Person]") {
 
     //create table
-    assert(createTable == 0)
+    assert(createTablePerson == 0)
     import doobie.util.update.Update
     type PersonInfo = (String, Option[Short])
 

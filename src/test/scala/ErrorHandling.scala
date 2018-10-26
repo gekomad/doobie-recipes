@@ -1,7 +1,7 @@
 
 import doobie.free.connection.ConnectionIO
 import org.scalatest.FunSuite
-import MyPredef.createTable
+import MyPredef.createTablePerson
 
 class ErrorHandling extends FunSuite {
 
@@ -9,10 +9,10 @@ class ErrorHandling extends FunSuite {
 
   import MyPredef.xa
 
-  test("select 1 column") {
+  test("error Handling") {
 
     //create table
-    assert(createTable == 0)
+    assert(createTablePerson == 0)
 
     import doobie.implicits._
 

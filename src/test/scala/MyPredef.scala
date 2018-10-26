@@ -2,9 +2,9 @@ import cats.effect.IO
 import doobie.Transactor
 
 object MyPredef {
+
   import scala.concurrent.ExecutionContext
 
-  import MyPredef.xa
   import doobie.implicits._
   import cats.implicits._
 
@@ -21,7 +21,7 @@ object MyPredef {
     "pass1" // password
   )
 
-  def createTable: Int = {
+  def createTablePerson: Int = {
     val drop = sql"""DROP TABLE IF EXISTS person""".update.run
 
     val create =
@@ -35,5 +35,19 @@ object MyPredef {
 
     (drop, create).mapN(_ + _).transact(xa).unsafeRunSync
 
+  }
+
+  def createTablePersonPets: Int = {
+    val drop = sql"DROP TABLE IF EXISTS person_pets".update.run
+
+    val create =
+      sql"""
+        CREATE TABLE person_pets (
+        id   SERIAL,
+        name VARCHAR   NOT NULL UNIQUE,
+        pets VARCHAR[] NOT NULL
+      )
+    """.update.run
+    (drop, create).mapN(_ + _).transact(xa).unsafeRunSync
   }
 }
