@@ -79,7 +79,7 @@ class DDL extends FunSuite {
 
     val elvis = insertAndRead("Elvis", None).transact(xa).unsafeRunSync
 
-    assert(elvis == Person(3, "Elvis", None))
+    assert(elvis == Person(1, "Elvis", None))
   }
 
   test("insert and read id") {
@@ -94,7 +94,7 @@ class DDL extends FunSuite {
 
     val id = insertAndReadId("Jack", None).transact(xa).unsafeRunSync
 
-    assert(id == 0)
+    assert(id == 1)
   }
 
 
