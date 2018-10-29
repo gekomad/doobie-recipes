@@ -136,32 +136,6 @@ class SelectingData extends FunSuite {
     assert(o == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
   }
 
-  /*
-   test("spool csv in stream fashion") {
-    import java.nio.file.Paths
-    import cats.effect.IO
-    import java.util.concurrent.Executors
-    import doobie.implicits._
-    import fs2.{io, text}
-    import scala.concurrent.ExecutionContext
-    val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
-    import cats.effect.ContextShift
-    implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
-
-    transactor.use { xa =>
-      sql"select code from country"
-        .query[String] // Query0[String]
-        .stream // Stream[ConnectionIO, String]
-        .transact(xa)
-        .intersperse("\n")
-        .through(text.utf8Encode)
-        .through(io.file.writeAll[IO](Paths.get("/tmp/output.csv"), blockingExecutionContext))
-        .compile.drain
-    }.unsafeRunSync()
-
-  }
-
-  */
 }
 
 
