@@ -30,7 +30,7 @@ class Logging extends FunSuite {
     import doobie.implicits._
     import doobie.util.log.LogHandler
 
-    implicit val han = LogHandler.jdkLogHandler
+    implicit val han: LogHandler = LogHandler.jdkLogHandler
 
     def byName(pat: String) = {
       transactor.use { xa =>

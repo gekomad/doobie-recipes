@@ -25,10 +25,14 @@ class ErrorHandling extends FunSuite {
         case a => a
       }
 
-    val res =  transactor.use { xa =>safeInsert("bob").transact(xa)}.unsafeRunSync
-    assert(res.isRight && res.getOrElse(???) == Person(1, "bob"))
+    val res = transactor.use { xa => safeInsert("bob").transact(xa) }.unsafeRunSync
 
-    assert( transactor.use { xa =>safeInsert("bob").transact(xa)}.unsafeRunSync.isLeft)
+    res match {
+      case Right(r) => assert(r == Person(1, "bob"))
+      case _ => assert(false)
+    }
+
+    assert(transactor.use { xa => safeInsert("bob").transact(xa) }.unsafeRunSync.isLeft)
 
   }
 
