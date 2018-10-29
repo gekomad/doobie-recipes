@@ -15,7 +15,7 @@ object MyPredef {
 
   // We need a ContextShift[IO] before we can construct a Transactor[IO]. The passed ExecutionContext
   // is where nonblocking operations will be executed.
-  implicit val cs = IO.contextShift(ExecutionContext.global)
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
 
   val transactor: Resource[IO, HikariTransactor[IO]] =

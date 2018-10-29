@@ -136,6 +136,29 @@ class SelectingData extends FunSuite {
     assert(o == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
   }
 
+  test("join") {
+    import MyPredef.transactor
+    import doobie.implicits._
+
+    case class Country(name: String, code: String)
+    case class City(name: String, district: String)
+
+    val join = transactor.use { xa =>
+      sql"""
+      select c.name, c.code,
+           k.name, k.district
+      from country c
+      left outer join city k
+      on c.capital = k.id
+      order by c.code desc
+      """.query[(Country, Option[City])].to[List]
+        .transact(xa)
+    }
+
+    assert(join.unsafeRunSync.take(2) == List((Country("Zimbabwe", "ZWE"), Some(City("Harare", "Harare"))), (Country("Zambia", "ZMB"), Some(City("Lusaka", "Lusaka")))))
+
+  }
+
 }
 
 
