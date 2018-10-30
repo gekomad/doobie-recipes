@@ -1,5 +1,6 @@
 import cats.effect._
 import doobie.implicits._
+import doobie.util.Read
 import org.scalatest.FunSuite
 
 import scala.collection.immutable
@@ -8,8 +9,23 @@ class SelectingData extends FunSuite {
 
   import MyPredef.transactor
 
+  case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
-  test("select 1 column") {
+  test("abstract select") {
+
+    def mySelect[A:Read]: immutable.Seq[A] = transactor.use { xa =>
+      sql"select code, name, population, gnp from country"
+        .query[A]
+        .to[List]
+        .transact(xa)
+    }
+      .unsafeRunSync
+      .take(3)
+
+    assert(mySelect[Country] == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
+  }
+
+  test("select one column") {
     val mySelect: IO[List[String]] = transactor.use { xa =>
       sql"select name from country"
         .query[String] // Query0[String]
@@ -71,8 +87,6 @@ class SelectingData extends FunSuite {
 
   test("mapping rows to a case class") {
 
-    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
-
     val mySelect: immutable.Seq[Country] = transactor.use { xa =>
       sql"select code, name, population, gnp from country"
         .query[Country]
@@ -121,8 +135,6 @@ class SelectingData extends FunSuite {
   }
 
   test("streaming") {
-
-    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
     val mySelect = transactor.use { xa =>
       sql"select code, name, population, gnp from country"
