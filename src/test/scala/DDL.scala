@@ -129,10 +129,10 @@ class DDL extends FunSuite {
         ("Jim-Bob", Some(12)))
 
       val x=transactor.use { xa =>
-        insertMany2(data).transact(xa)
+        insertMany2(data).compile.toList.transact(xa)
       }
 
-      assert(x.compile.toList.unsafeRunSync() == List(Person(1, "Banjo", Some(39)), Person(2, "Skeeter", None), Person(3, "Jim-Bob", Some(12))))
+      assert(x.unsafeRunSync() == List(Person(1, "Banjo", Some(39)), Person(2, "Skeeter", None), Person(3, "Jim-Bob", Some(12))))
 
     }
   */
