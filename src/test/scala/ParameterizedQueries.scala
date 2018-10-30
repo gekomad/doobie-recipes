@@ -1,14 +1,15 @@
 import MyPredef.transactor
+
 import doobie.implicits._
 import org.scalatest.FunSuite
 
 class ParameterizedQueries extends FunSuite {
 
+  case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
+
   test("bigger than") {
 
-    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
-
-    def biggerThan(minPop: Int): List[Country] =  transactor.use { xa =>
+    def biggerThan(minPop: Int): List[Country] = transactor.use { xa =>
       sql"""
       select code, name, population, gnp
       from country
@@ -32,8 +33,6 @@ class ParameterizedQueries extends FunSuite {
 
     import doobie._, doobie.implicits._
 
-    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
-
     def populationIn(range: Range, codes: NonEmptyList[String]) = {
       val q =
         fr"""
@@ -45,14 +44,39 @@ class ParameterizedQueries extends FunSuite {
       q.query[Country]
     }
 
-    val mySelect: List[Country] =  transactor.use { xa =>
+    val mySelect: List[Country] = transactor.use { xa =>
       populationIn(100000000 to 300000000, NonEmptyList.of("USA", "BRA", "PAK", "GBR"))
         .to[List]
         .transact(xa) // IO[List[Country]]
-    } .unsafeRunSync // List[Country]]
+    }.unsafeRunSync // List[Country]]
       .take(2) // List[Country]]ConnectionIO
 
     assert(mySelect == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("PAK", "Pakistan", 156483000, Some(61289.0))))
+
+  }
+
+  test("parameters") {
+    import doobie.free.connection.ConnectionIO
+    import fs2.Stream
+    import doobie._
+
+    val q =
+      """
+      select code, name, population, gnp
+      from country
+      where population > ?
+      and   population < ?
+      """
+
+    def populationIn(range: Range): Stream[ConnectionIO, Country] =
+      HC.stream[Country](q, HPS.set((range.min, range.max)), 512)
+
+
+    val x = transactor.use { xa =>
+      populationIn(150000000 to 200000000).compile.toList.transact(xa)
+    }
+
+    assert(x.unsafeRunSync()==List(Country("BRA","Brazil",170115000,Some(776739.0)), Country("PAK","Pakistan",156483000,Some(61289.0))))
 
   }
 
