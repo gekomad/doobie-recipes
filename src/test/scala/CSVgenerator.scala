@@ -68,40 +68,47 @@ class CSVgenerator extends FunSuite {
     spool[Country]
   }
 
-  test("spool csv") {
-
-    import java.nio.file.Paths
-    import java.util.concurrent.Executors
+  test("spool csv Parameterized") {
 
     import _root_.io.chrisdavenport.cormorant._
     import _root_.io.chrisdavenport.cormorant.generic.semiauto._
     import _root_.io.chrisdavenport.cormorant.implicits._
+    import java.nio.file.Paths
+    import java.util.concurrent.Executors
     import cats.effect.IO
     import doobie.implicits._
     import fs2.{io, text}
-
     import scala.concurrent.ExecutionContext
+    import doobie.{HC, HPS}
+
+    import cats.effect.ContextShift
+    implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+    val printer = Printer.generic(";", "\n", "\"", "\"", Set("\r"))
+
+    val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
 
     implicit val lr: LabelledRead[Country] = deriveLabelledRead
     implicit val lw: LabelledWrite[Country] = deriveLabelledWrite
 
-    val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
-    import cats.effect.ContextShift
-    implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
-
-    val printer = Printer.generic(";", "\n", "\"", "\"", Set("\r"))
+    val q =
+      """
+      select code, name, population, gnp
+      from country
+      where population > ?
+      and   population < ?
+      """
 
     transactor.use { xa =>
-      sql"select code, name, population, gnp from country"
-        .query[Country]
-        .stream
+      HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
         .transact(xa)
         .through(_.map(_.write.print(printer)))
         .intersperse("\n")
         .through(text.utf8Encode)
-        .through(io.file.writeAll[IO](Paths.get("/tmp/output.csv"), blockingExecutionContext))
+        .through(io.file.writeAll[IO](Paths.get("/tmp/country.out"), blockingExecutionContext))
         .compile.drain
     }.unsafeRunSync()
+
+
   }
 
 
