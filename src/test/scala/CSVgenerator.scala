@@ -11,6 +11,34 @@ class CSVgenerator extends FunSuite {
 
   case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
+  test("cormorant test") {
+    import io.chrisdavenport.cormorant._
+    import io.chrisdavenport.cormorant.generic.semiauto._
+    import io.chrisdavenport.cormorant.implicits._
+
+    case class Bar(a: String, b: Int, c: Long)
+
+    implicit val lr: LabelledRead[Bar] = deriveLabelledRead
+
+    implicit val lw: LabelledWrite[Bar] = deriveLabelledWrite
+
+    // A List of A given derived type
+    val l: List[Bar] = List(
+      Bar("Ye,llow", 3, 5L),
+      Bar("""B,"oo""", 7, 6L),
+      Bar("Hi", 7, 16L)
+    )
+
+    // From Type to String
+    val csv = l.writeComplete.print(Printer.default)
+
+    assert(csv ==
+      """a,b,c
+        |"Ye,llow",3,5
+        |"B,""oo",7,6
+        |Hi,7,16""".stripMargin)
+  }
+
   test("abstract select") {
 
     import doobie.implicits._
@@ -57,7 +85,7 @@ class CSVgenerator extends FunSuite {
           .through(_.map(_.write.print(printer)))
           .intersperse("\n")
           .through(text.utf8Encode)
-          .through(io.file.writeAll[IO](Paths.get("/tmp/output.csv"), blockingExecutionContext))
+          .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/output.csv"), blockingExecutionContext))
           .compile.drain
       }.unsafeRunSync()
     }
@@ -104,14 +132,10 @@ class CSVgenerator extends FunSuite {
         .through(_.map(_.write.print(printer)))
         .intersperse("\n")
         .through(text.utf8Encode)
-        .through(io.file.writeAll[IO](Paths.get("/tmp/country.out"), blockingExecutionContext))
+        .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country.out"), blockingExecutionContext))
         .compile.drain
     }.unsafeRunSync()
-
-
   }
-
-
 }
 
 

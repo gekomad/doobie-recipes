@@ -1,4 +1,5 @@
-# [Doobie exercises](https://tpolecat.github.io/doobie/docs/01-Introduction.html)
+
+# [Doobie recipes](https://tpolecat.github.io/doobie/docs/01-Introduction.html)
   
 <table>      
 <td align="left">        
@@ -8,7 +9,7 @@
 </table>      
       
   
-### Sample Database Setup  
+### Database Setup
 
 The example code assumes a local PostgreSQL server with a postgres user and password 'pass1'
 ```  
@@ -23,5 +24,13 @@ psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres
   
 ### run test
 ```
+sbt [-Dtmp_directory=dir] test
+
+default is /tmp
+
+example
+
 sbt test
+
+sbt -Dtmp_directory="/tmp" test
 ```

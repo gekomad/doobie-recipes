@@ -3,6 +3,12 @@ import doobie.Transactor
 
 object MyPredef {
 
+  val tmpDir: String = {
+    val tmp = if (System.getProperty("tmp_directory") == null) "/tmp" else System.getProperty("tmp_directory")
+    println(s"tmp directory: $tmp")
+    tmp
+  }
+
   import scala.concurrent.ExecutionContext
 
   import doobie.implicits._
@@ -63,6 +69,7 @@ object MyPredef {
     transactor.use { xa =>
       (drop, create).mapN(_ + _).transact(xa)
     }.unsafeRunSync
-
   }
+
+
 }

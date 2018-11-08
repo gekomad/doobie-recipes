@@ -1,4 +1,4 @@
-name := "doobie-exercises"
+name := "doobie-recipes"
 
 version := "0.1"
 
@@ -20,7 +20,8 @@ libraryDependencies ++= Seq(
   //cormorant csv
   "io.chrisdavenport" %% "cormorant-core" % cormorantVersion,
   "io.chrisdavenport" %% "cormorant-generic" % cormorantVersion,
-
+  "io.chrisdavenport" %% "cormorant-parser"   % cormorantVersion,
+  "io.chrisdavenport" %% "cormorant-refined" % cormorantVersion,
   // test
   "org.scalatest" %% "scalatest" % scalatestVersion % "test"
 )
