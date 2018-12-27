@@ -1,14 +1,12 @@
 name := "doobie-recipes"
 
-version := "0.1"
+version := "0.2"
 
-scalaVersion := "2.12.7"
+scalaVersion := "2.12.8"
 
 scalacOptions += "-Ypartial-unification"
 
 lazy val doobieVersion = "0.6.0"
-lazy val scalatestVersion = "3.0.5"
-lazy val cormorantVersion = "0.0.7"
 
 libraryDependencies ++= Seq(
   //doobie
@@ -16,15 +14,11 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-postgres" % doobieVersion,
   "org.tpolecat" %% "doobie-specs2" % doobieVersion,
   "org.tpolecat" %% "doobie-hikari" % doobieVersion,
-
-  //cormorant csv
-  "io.chrisdavenport" %% "cormorant-core" % cormorantVersion,
-  "io.chrisdavenport" %% "cormorant-generic" % cormorantVersion,
-  "io.chrisdavenport" %% "cormorant-parser"   % cormorantVersion,
-  "io.chrisdavenport" %% "cormorant-refined" % cormorantVersion,
-  // test
-  "org.scalatest" %% "scalatest" % scalatestVersion % "test"
 )
 
+// test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+
+libraryDependencies += "com.github.gekomad" %% "itto-csv" % "0.0.1"
 
 parallelExecution in Test := false

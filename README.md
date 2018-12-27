@@ -11,7 +11,7 @@
   
 ### Database Setup
 
-The example code assumes a local PostgreSQL server with a postgres user and password 'pass1'
+The example code assumes a local PostgreSQL server with a postgres user 'postgres' and password 'pass1'
 ```  
 wget https://raw.githubusercontent.com/tpolecat/doobie/series/0.5.x/world.sql  
 sudo su postgres  
