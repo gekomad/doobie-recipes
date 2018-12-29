@@ -1,6 +1,6 @@
 name := "doobie-recipes"
 
-version := "0.2"
+version := "0.3"
 
 scalaVersion := "2.12.8"
 
@@ -19,6 +19,6 @@ libraryDependencies ++= Seq(
 // test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 
-libraryDependencies += "com.github.gekomad" %% "itto-csv" % "0.0.1"
+libraryDependencies += "com.github.gekomad" %% "itto-csv" % "0.0.2"
 
 parallelExecution in Test := false
