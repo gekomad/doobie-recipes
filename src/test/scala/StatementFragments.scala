@@ -28,10 +28,12 @@ class StatementFragments extends FunSuite {
           whereAndOpt(f1, f2, f3) ++
           fr"LIMIT $limit"
 
-      transactor.use { xa =>
-        q.query[Info].to[List] // ConnectionIO[List[String]]
-          .transact(xa) // IO[List[String]]
-      }
+      transactor
+        .use { xa =>
+          q.query[Info]
+            .to[List] // ConnectionIO[List[String]]
+            .transact(xa) // IO[List[String]]
+        }
         .unsafeRunSync // List[String]
         .take(2) // List[Strings]
 
@@ -43,5 +45,3 @@ class StatementFragments extends FunSuite {
   }
 
 }
-
-

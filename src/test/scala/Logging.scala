@@ -6,7 +6,6 @@ class Logging extends FunSuite {
 
   case class Person(id: Int, name: String)
 
-
   test("logging") {
 
     import doobie.implicits._
@@ -23,7 +22,6 @@ class Logging extends FunSuite {
 
     assert(byName("U%").unsafeRunSync.take(2) == List(("United Arab Emirates", "ARE"), ("United Kingdom", "GBR")))
   }
-
 
   test("implicit logging") {
 
@@ -45,5 +43,3 @@ class Logging extends FunSuite {
   }
 
 }
-
-

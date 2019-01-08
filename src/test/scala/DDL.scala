@@ -1,7 +1,7 @@
 import cats.data.NonEmptyList
 import com.github.gekomad.ittocsv.parser.IttoCSVFormat
 import com.github.gekomad.ittocsv.core.FromCsv
-import com.github.gekomad.ittocsv.core.FromCsv.Schema
+import com.github.gekomad.ittocsv.core.Schema
 import com.github.gekomad.ittocsv.core.Header.FieldNames
 import doobie.free.connection.ConnectionIO
 import org.scalatest.FunSuite
@@ -18,7 +18,6 @@ class DDL extends FunSuite {
   case class Person(id: Long, name: String, age: Option[Short])
 
   test("insert read update") {
-
     //create table
     assert(createTablePerson == 0)
 
@@ -26,8 +25,12 @@ class DDL extends FunSuite {
     import doobie.util.update.Update0
     def insert1(name: String, age: Option[Short]): Update0 = sql"insert into person (name, age) values ($name, $age)".update
 
-    assert(transactor.use { xa => insert1("Alice", Some(12)).run.transact(xa) }.unsafeRunSync == 1)
-    assert(transactor.use { xa => insert1("Bob", None).run.transact(xa) }.unsafeRunSync == 1)
+    assert(transactor.use { xa =>
+      insert1("Alice", Some(12)).run.transact(xa)
+    }.unsafeRunSync == 1)
+    assert(transactor.use { xa =>
+      insert1("Bob", None).run.transact(xa)
+    }.unsafeRunSync == 1)
 
     //read
     {
@@ -48,12 +51,13 @@ class DDL extends FunSuite {
     assert(createTablePerson == 0)
 
     def insertAndRead(name: String, age: Option[Short]): ConnectionIO[Person] = {
-      sql"insert into person (name, age) values ($name, $age)"
-        .update
+      sql"insert into person (name, age) values ($name, $age)".update
         .withUniqueGeneratedKeys("id", "name", "age")
     }
 
-    val elvis = transactor.use { xa => insertAndRead("Elvis", None).transact(xa) }.unsafeRunSync
+    val elvis = transactor.use { xa =>
+      insertAndRead("Elvis", None).transact(xa)
+    }.unsafeRunSync
 
     assert(elvis == Person(1, "Elvis", None))
   }
@@ -63,16 +67,16 @@ class DDL extends FunSuite {
     assert(createTablePerson == 0)
 
     def insertAndReadId(name: String, age: Option[Short]): ConnectionIO[Int] = {
-      sql"insert into person (name, age) values ($name, $age)"
-        .update
+      sql"insert into person (name, age) values ($name, $age)".update
         .withUniqueGeneratedKeys("id")
     }
 
-    val id = transactor.use { xa => insertAndReadId("Jack", None).transact(xa) }.unsafeRunSync
+    val id = transactor.use { xa =>
+      insertAndReadId("Jack", None).transact(xa)
+    }.unsafeRunSync
 
     assert(id == 1)
   }
-
 
   test("batch") {
     //create table
@@ -87,14 +91,12 @@ class DDL extends FunSuite {
     }
 
     // Some rows to insert
-    val data = List[PersonInfo](
-      ("Frank", Some(12)),
-      ("Daddy", None))
+    val data = List[PersonInfo](("Frank", Some(12)), ("Daddy", None))
 
-    assert(transactor.use { xa => insertMany(data).transact(xa) }.unsafeRunSync == 2)
+    assert(transactor.use { xa =>
+      insertMany(data).transact(xa)
+    }.unsafeRunSync == 2)
 
   }
 
 }
-
-

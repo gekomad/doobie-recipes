@@ -9,23 +9,25 @@ class ParameterizedQueries extends FunSuite {
 
   test("bigger than") {
 
-    def biggerThan(minPop: Int): List[Country] = transactor.use { xa =>
-      sql"""
+    def biggerThan(minPop: Int): List[Country] =
+      transactor
+        .use { xa =>
+          sql"""
       select code, name, population, gnp
       from country
       where population > $minPop
       """.query[Country]
-        .to[List] // ConnectionIO[List[Country]]
-        .transact(xa) // IO[List[Country]]
-    }.unsafeRunSync // List[Country]]
-      .take(2) // List[Country]]
+            .to[List] // ConnectionIO[List[Country]]
+            .transact(xa) // IO[List[Country]]
+        }
+        .unsafeRunSync // List[Country]]
+        .take(2) // List[Country]]
 
     val mySelect = biggerThan(150000000)
 
     assert(mySelect == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("IDN", "Indonesia", 212107000, Some(84982.0))))
 
   }
-
 
   test("IN Clauses") {
 
@@ -44,11 +46,13 @@ class ParameterizedQueries extends FunSuite {
       q.query[Country]
     }
 
-    val mySelect: List[Country] = transactor.use { xa =>
-      populationIn(100000000 to 300000000, NonEmptyList.of("USA", "BRA", "PAK", "GBR"))
-        .to[List]
-        .transact(xa) // IO[List[Country]]
-    }.unsafeRunSync // List[Country]]
+    val mySelect: List[Country] = transactor
+      .use { xa =>
+        populationIn(100000000 to 300000000, NonEmptyList.of("USA", "BRA", "PAK", "GBR"))
+          .to[List]
+          .transact(xa) // IO[List[Country]]
+      }
+      .unsafeRunSync // List[Country]]
       .take(2) // List[Country]]ConnectionIO
 
     assert(mySelect == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("PAK", "Pakistan", 156483000, Some(61289.0))))
@@ -71,15 +75,12 @@ class ParameterizedQueries extends FunSuite {
     def populationIn(range: Range): Stream[ConnectionIO, Country] =
       HC.stream[Country](q, HPS.set((range.min, range.max)), 512)
 
-
     val x = transactor.use { xa =>
       populationIn(150000000 to 200000000).compile.toList.transact(xa)
     }
 
-    assert(x.unsafeRunSync()==List(Country("BRA","Brazil",170115000,Some(776739.0)), Country("PAK","Pakistan",156483000,Some(61289.0))))
+    assert(x.unsafeRunSync() == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("PAK", "Pakistan", 156483000, Some(61289.0))))
 
   }
 
 }
-
-

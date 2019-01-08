@@ -2,7 +2,6 @@ import java.sql.Timestamp
 import java.time.LocalDate
 import java.util.UUID
 
-
 import scala.util.Random
 
 object RandomUtil {
@@ -37,7 +36,7 @@ object RandomUtil {
 
   def getRandomTimestamp: Timestamp = {
     val unixtime = 1293861599 + scala.util.Random.nextDouble() * 60 * 60 * 24 * 365
-    val o = new java.util.Date(unixtime.toLong).getTime
+    val o        = new java.util.Date(unixtime.toLong).getTime
     new Timestamp(o)
   }
 

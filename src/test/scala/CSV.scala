@@ -1,4 +1,4 @@
-
+import com.github.gekomad.ittocsv.core.ParseFailure
 import org.scalatest.FunSuite
 
 class CSV extends FunSuite {
@@ -19,7 +19,7 @@ class CSV extends FunSuite {
       import java.nio.file.Paths
       import java.util.concurrent.Executors
       import com.github.gekomad.ittocsv.core.FromCsv
-      import com.github.gekomad.ittocsv.core.FromCsv.Schema
+      import com.github.gekomad.ittocsv.core.Schema
       import cats.effect.IO
       import fs2.{io, text}
 
@@ -31,7 +31,6 @@ class CSV extends FunSuite {
 
       implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
 
-
       import cats.implicits._
       import doobie.implicits._
       import doobie.util.update.Update
@@ -42,23 +41,26 @@ class CSV extends FunSuite {
 
       implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
 
-
       //read from file N rows and store in db
-      def readCsvAndWriteDB[B: doobie.util.Read : doobie.util.Write : FieldNames : Schema](inOutFile: String, sql: String): Unit = {
+      def readCsvAndWriteDB[B: doobie.util.Read: doobie.util.Write: FieldNames: Schema](inOutFile: String, sql: String): Unit = {
         import cats.instances.list._
 
         import cats.syntax.traverse._
 
-        def bulkInsert[A: doobie.util.Read : doobie.util.Write : FieldNames : Schema](csvList: List[String], count: Long): Either[NonEmptyList[FromCsv.ParseFailure], IO[Int]] = {
-          val csv = if (count == 0)
-            csvList.drop(1) else csvList
+        def bulkInsert[A: doobie.util.Read: doobie.util.Write: FieldNames: Schema](csvList: List[String], count: Long): Either[NonEmptyList[ParseFailure], IO[Int]] = {
+          val csv =
+            if (count == 0)
+              csvList.drop(1)
+            else csvList
 
           //write the list into db
-          val x: Either[NonEmptyList[FromCsv.ParseFailure], List[A]] = csv.map(fromCsv[A](_).head).sequence
+          val x: Either[NonEmptyList[ParseFailure], List[A]] = csv.map(fromCsv[A](_).head).sequence
 
           x match {
             case Right(t) =>
-              val dd = transactor.use { xa => Update[A](sql).updateMany(t).transact(xa) }
+              val dd = transactor.use { xa =>
+                Update[A](sql).updateMany(t).transact(xa)
+              }
               Right(dd)
             case Left(e) =>
               println("err: " + e)
@@ -66,11 +68,15 @@ class CSV extends FunSuite {
           }
         }
 
-        io.file.readAll[IO](Paths.get(inOutFile), blockingExecutionContext, 4096)
+        io.file
+          .readAll[IO](Paths.get(inOutFile), blockingExecutionContext, 4096)
           .through(text.utf8Decode)
           .through(text.lines)
-          .chunkN(maxRowsToCommit).zipWithIndex
-          .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync)).compile.drain
+          .chunkN(maxRowsToCommit)
+          .zipWithIndex
+          .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync))
+          .compile
+          .drain
           .unsafeRunSync()
       }
     }
@@ -90,7 +96,7 @@ class CSV extends FunSuite {
     import cats.implicits._
     import doobie.implicits._
 
-    val nRecords = 1000
+    val nRecords  = 1000
     val inOutFile = s"${MyPredef.tmpDir}/test2.csv"
 
     //create csv file and table
@@ -143,11 +149,7 @@ class CSV extends FunSuite {
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default.withPrintHeader(false)
     case class Bar(a: String, b: Int, c: Long)
 
-    val l: List[Bar] = List(
-      Bar("Ye,llow", 3, 5L),
-      Bar("""B,"oo""", 7, 6L),
-      Bar("Hi", 7, 16L)
-    )
+    val l: List[Bar] = List(Bar("Ye,llow", 3, 5L), Bar("""B,"oo""", 7, 6L), Bar("Hi", 7, 16L))
 
     val csv = toCsvL(l)
 
@@ -159,16 +161,24 @@ class CSV extends FunSuite {
     import doobie.implicits._
     import doobie.util.Read
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
-    def mySelect[A: Read]: immutable.Seq[Any] = transactor.use { xa =>
-      sql"select code, name, population, gnp from country"
-        .query[A]
-        .to[List]
-        .transact(xa)
-    }
-      .unsafeRunSync
-      .take(3)
+    def mySelect[A: Read]: immutable.Seq[Any] =
+      transactor
+        .use { xa =>
+          sql"select code, name, population, gnp from country"
+            .query[A]
+            .to[List]
+            .transact(xa)
+        }
+        .unsafeRunSync
+        .take(3)
 
-    assert(mySelect[Country] == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
+    assert(
+      mySelect[Country] == List(
+        Country("AFG", "Afghanistan", 22720000, Some(5976.0)),
+        Country("NLD", "Netherlands", 15864000, Some(371362.0)),
+        Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))
+      )
+    )
   }
 
   test("spool csv Parameterized") {
@@ -185,7 +195,7 @@ class CSV extends FunSuite {
     implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
     import com.github.gekomad.ittocsv.core.ToCsv._
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
-    val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
+    val blockingExecutionContext          = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
     val q =
       """
@@ -197,22 +207,25 @@ class CSV extends FunSuite {
       limit 3
       """
 
-    transactor.use { xa =>
-      HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
-        .transact(xa)
-        .through(_.map(toCsv(_)))
-        .intersperse("\n")
-        .through(text.utf8Encode)
-        .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country2.out"), blockingExecutionContext))
-        .compile.drain
-    }.unsafeRunSync()
+    transactor
+      .use { xa =>
+        HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
+          .transact(xa)
+          .through(_.map(toCsv(_)))
+          .intersperse("\n")
+          .through(text.utf8Encode)
+          .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country2.out"), blockingExecutionContext))
+          .compile
+          .drain
+      }
+      .unsafeRunSync()
 
     val lines = scala.io.Source.fromFile(s"${MyPredef.tmpDir}/country2.out").getLines.mkString("\n")
-    assert(lines ==
-      """BRA,Brazil,170115000,776739.0
-        |PAK,Pakistan,156483000,61289.0""".stripMargin)
+    assert(
+      lines ==
+        """BRA,Brazil,170115000,776739.0
+        |PAK,Pakistan,156483000,61289.0""".stripMargin
+    )
   }
 
 }
-
-

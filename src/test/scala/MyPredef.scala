@@ -23,11 +23,10 @@ object MyPredef {
   // is where nonblocking operations will be executed.
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
 
-
   val transactor: Resource[IO, HikariTransactor[IO]] =
     for {
       ce <- ExecutionContexts.fixedThreadPool[IO](32) // our connect EC
-      te <- ExecutionContexts.cachedThreadPool[IO] // our transaction EC
+      te <- ExecutionContexts.cachedThreadPool[IO]    // our transaction EC
       xa <- HikariTransactor.newHikariTransactor[IO](
         "org.postgresql.Driver", // driver classname
         "jdbc:postgresql:world", // connect URL
@@ -70,6 +69,5 @@ object MyPredef {
       (drop, create).mapN(_ + _).transact(xa)
     }.unsafeRunSync
   }
-
 
 }

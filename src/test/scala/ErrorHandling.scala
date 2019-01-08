@@ -1,4 +1,3 @@
-
 import doobie.free.connection.ConnectionIO
 import org.scalatest.FunSuite
 import MyPredef.{createTablePerson, transactor}
@@ -15,8 +14,7 @@ class ErrorHandling extends FunSuite {
     import doobie.implicits._
 
     def insert(s: String): ConnectionIO[Person] = {
-      sql"insert into person (name) values ($s)"
-        .update
+      sql"insert into person (name) values ($s)".update
         .withUniqueGeneratedKeys("id", "name")
     }
 
@@ -25,17 +23,24 @@ class ErrorHandling extends FunSuite {
         case a => a
       }
 
-    val res = transactor.use { xa => safeInsert("bob").transact(xa) }.unsafeRunSync
+    val res = transactor.use { xa =>
+      safeInsert("bob").transact(xa)
+    }.unsafeRunSync
 
     res match {
       case Right(r) => assert(r == Person(1, "bob"))
-      case _ => assert(false)
+      case _        => assert(false)
     }
 
-    assert(transactor.use { xa => safeInsert("bob").transact(xa) }.unsafeRunSync.isLeft)
+    assert(
+      transactor
+        .use { xa =>
+          safeInsert("bob").transact(xa)
+        }
+        .unsafeRunSync
+        .isLeft
+    )
 
   }
 
 }
-
-

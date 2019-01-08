@@ -1,4 +1,3 @@
-
 import org.scalatest.FunSuite
 
 class Itto extends FunSuite {
@@ -6,7 +5,6 @@ class Itto extends FunSuite {
   import MyPredef.transactor
 
   case class Test2(field1: Int, field2: Option[String], field3: Option[Int])
-
 
   object ToCsvT {
 
@@ -35,29 +33,35 @@ class Itto extends FunSuite {
     implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
     import com.github.gekomad.ittocsv.core.ToCsv._
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
-    val blockingExecutionContext = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
+    val blockingExecutionContext          = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
     val q = "select code, name, population, gnp from country order by code limit 3"
 
-    transactor.use { xa =>
-      Fragment.const(q).query[Country].stream
-        .transact(xa).zipWithIndex
-        .through(_.map(toCsvT(_)))
-        .through(text.utf8Encode)
-        .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country1.out"), blockingExecutionContext))
-        .compile.drain
-    }.unsafeRunSync()
+    transactor
+      .use { xa =>
+        Fragment
+          .const(q)
+          .query[Country]
+          .stream
+          .transact(xa)
+          .zipWithIndex
+          .through(_.map(toCsvT(_)))
+          .through(text.utf8Encode)
+          .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country1.out"), blockingExecutionContext))
+          .compile
+          .drain
+      }
+      .unsafeRunSync()
 
     val lines = scala.io.Source.fromFile(s"${MyPredef.tmpDir}/country1.out").getLines.mkString("\n")
-    assert(lines ==
-      """code,name,pop,gnp
+    assert(
+      lines ==
+        """code,name,pop,gnp
         |ABW,Aruba,103000,828.0
         |AFG,Afghanistan,22720000,5976.0
-        |AGO,Angola,12878000,6648.0""".stripMargin)
+        |AGO,Angola,12878000,6648.0""".stripMargin
+    )
   }
 
-
 }
-
-
