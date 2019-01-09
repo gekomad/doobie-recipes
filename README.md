@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.com/gekomad/doobie-recipes.svg?branch=master)](https://travis-ci.com/gekomad/doobie-recipes)
-
 # [Doobie recipes](https://tpolecat.github.io/doobie/docs/01-Introduction.html)
   
 <table>      
