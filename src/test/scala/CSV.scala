@@ -42,7 +42,7 @@ class CSV extends FunSuite {
       implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
 
       //read from file N rows and store in db
-      def readCsvAndWriteDB[B: doobie.util.Read: doobie.util.Write: FieldNames: Schema](inOutFile: String, sql: String): Unit = {
+      def readCsvAndWriteDB[B: doobie.util.Read: doobie.util.Write: FieldNames: Schema](inOutFile: String, sql: String): IO[Unit] = {
         import cats.instances.list._
 
         import cats.syntax.traverse._
@@ -77,17 +77,14 @@ class CSV extends FunSuite {
           .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync))
           .compile
           .drain
-          .unsafeRunSync()
       }
     }
 
     import java.nio.file.Paths
-    import java.util.concurrent.Executors
+
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import RandomUtil._
     import cats.effect.IO
-
-    import scala.concurrent.ExecutionContext
 
     import cats.effect.ContextShift
 
@@ -99,10 +96,17 @@ class CSV extends FunSuite {
     val nRecords  = 1000
     val inOutFile = s"${MyPredef.tmpDir}/test2.csv"
 
-    //create csv file and table
     import com.github.gekomad.ittocsv.core.Header.csvHeader
     import com.github.gekomad.ittocsv.core.ToCsv._
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
+
+    def tableTest2: List[Test2] =
+      transactor.use { xa =>
+        sql"select field1, field2, field3 from test2 order by 1"
+          .query[Test2]
+          .to[List]
+          .transact(xa)
+      }.unsafeRunSync
 
     //create csv file
     val test2List = (0 until nRecords).toList.map { count =>
@@ -131,16 +135,12 @@ class CSV extends FunSuite {
       }.unsafeRunSync
     })
 
-    ReadCsvAndWriteDB.readCsvAndWriteDB[Test2](inOutFile, "insert into test2 (field1, field2, field3) values (?, ?, ?)")
-    import scala.collection.immutable
-    val mySelect: immutable.Seq[Test2] = transactor.use { xa =>
-      sql"select field1, field2, field3 from test2 order by 1"
-        .query[Test2]
-        .to[List]
-        .transact(xa)
-    }.unsafeRunSync
+    assert(tableTest2 == Nil)
 
-    assert(mySelect == test2List)
+    ReadCsvAndWriteDB.readCsvAndWriteDB[Test2](inOutFile, "insert into test2 (field1, field2, field3) values (?, ?, ?)").unsafeRunSync
+
+    assert(tableTest2 == test2List)
+    assert(tableTest2.size == nRecords)
   }
 
   test("itto-csv test") {

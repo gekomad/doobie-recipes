@@ -19,6 +19,6 @@ libraryDependencies ++= Seq(
 // test
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 
-libraryDependencies += "com.github.gekomad" %% "itto-csv" % "0.0.3"
+libraryDependencies += "com.github.gekomad" %% "itto-csv" % "0.1.0"
 
 parallelExecution in Test := false
