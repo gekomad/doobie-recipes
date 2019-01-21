@@ -1,3 +1,5 @@
+import java.nio.file.StandardOpenOption
+
 import org.scalatest.FunSuite
 
 class Itto extends FunSuite {
@@ -6,23 +8,10 @@ class Itto extends FunSuite {
 
   case class Test2(field1: Int, field2: Option[String], field3: Option[Int])
 
-  object ToCsvT {
-
-    import com.github.gekomad.ittocsv.core.CsvStringEncoder
-    import com.github.gekomad.ittocsv.core.Header._
-    import com.github.gekomad.ittocsv.core.ToCsv.toCsv
-    import com.github.gekomad.ittocsv.parser.IttoCSVFormat
-
-    def toCsvT[A: FieldNames](csvT: (A, Long))(implicit enc: CsvStringEncoder[A], csvFormat: IttoCSVFormat): String =
-      (if (csvT._2 == 0) csvHeader[A] else "") + toCsv(csvT._1, true)
-
-  }
-
   test("spool csv") {
     import java.nio.file.Paths
     import java.util.concurrent.Executors
 
-    import ToCsvT._
     import cats.effect.{ContextShift, IO}
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import doobie.implicits._
@@ -36,25 +25,30 @@ class Itto extends FunSuite {
     val blockingExecutionContext          = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
+    val fileName = s"${MyPredef.tmpDir}/country1.out"
+
     val q = "select code, name, population, gnp from country order by code limit 3"
 
-    transactor
-      .use { xa =>
-        Fragment
-          .const(q)
-          .query[Country]
-          .stream
-          .transact(xa)
-          .zipWithIndex
-          .through(_.map(toCsvT(_)))
-          .through(text.utf8Encode)
-          .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country1.out"), blockingExecutionContext))
-          .compile
-          .drain
-      }
-      .unsafeRunSync()
+    {
+      for {
+        _ <- Util.writeIttoHeaderTofile[Country](fileName)
+        _ <- transactor
+          .use { xa =>
+            Fragment
+              .const(q)
+              .query[Country]
+              .stream
+              .transact(xa)
+              .through(_.map(toCsv(_, true)))
+              .through(text.utf8Encode)
+              .through(io.file.writeAll[IO](Paths.get(fileName), blockingExecutionContext, Seq(StandardOpenOption.APPEND)))
+              .compile
+              .drain
+          }
+      } yield ()
+    }.unsafeRunSync()
 
-    val lines = scala.io.Source.fromFile(s"${MyPredef.tmpDir}/country1.out").getLines.mkString("\n")
+    val lines = scala.io.Source.fromFile(fileName).getLines.mkString("\n")
     assert(
       lines ==
         """code,name,pop,gnp

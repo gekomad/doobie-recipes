@@ -1,5 +1,11 @@
+import java.io.{File, FileInputStream, FileOutputStream, PrintWriter}
+import java.nio.file.StandardOpenOption
+
+import com.github.gekomad.ittocsv.core.Header.csvHeader
 import com.github.gekomad.ittocsv.core.ParseFailure
 import org.scalatest.FunSuite
+
+import scala.util.Try
 
 class CSV extends FunSuite {
 
@@ -206,26 +212,76 @@ class CSV extends FunSuite {
       order by code
       limit 3
       """
+    val fileName = s"${MyPredef.tmpDir}/country2.out"
 
-    transactor
-      .use { xa =>
-        HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
-          .transact(xa)
-          .through(_.map(toCsv(_)))
-          .intersperse("\n")
-          .through(text.utf8Encode)
-          .through(io.file.writeAll[IO](Paths.get(s"${MyPredef.tmpDir}/country2.out"), blockingExecutionContext))
-          .compile
-          .drain
-      }
-      .unsafeRunSync()
+    {
+      for {
+        _ <- Util.writeIttoHeaderTofile[Country](fileName)
+        _ <- transactor.use { xa =>
+          HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
+            .transact(xa)
+            .through(_.map(toCsv(_, true)))
+            .through(text.utf8Encode)
+            .through(io.file.writeAll[IO](Paths.get(fileName), blockingExecutionContext, Seq(StandardOpenOption.APPEND)))
+            .compile
+            .drain
+        }
+      } yield ()
+    }.unsafeRunSync()
 
-    val lines = scala.io.Source.fromFile(s"${MyPredef.tmpDir}/country2.out").getLines.mkString("\n")
+    val lines = scala.io.Source.fromFile(fileName).getLines.mkString("\n")
     assert(
       lines ==
-        """BRA,Brazil,170115000,776739.0
-        |PAK,Pakistan,156483000,61289.0""".stripMargin
+        """code,name,pop,gnp
+          |BRA,Brazil,170115000,776739.0
+          |PAK,Pakistan,156483000,61289.0""".stripMargin
     )
   }
 
+  test("spool empty csv Parameterized") {
+    import com.github.gekomad.ittocsv.parser.IttoCSVFormat
+    import java.nio.file.Paths
+    import java.util.concurrent.Executors
+    import cats.effect.IO
+    import doobie.implicits._
+    import fs2.{io, text}
+    import scala.concurrent.ExecutionContext
+    import doobie.{HC, HPS}
+
+    import cats.effect.ContextShift
+    implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+    import com.github.gekomad.ittocsv.core.ToCsv._
+    implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
+    val blockingExecutionContext          = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
+    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
+    val q =
+      """
+      select code, name, population, gnp
+      from country
+      where population < ?
+      """
+    val fileName = s"${MyPredef.tmpDir}/country2.out"
+
+    val o = for {
+      _ <- Util.writeIttoHeaderTofile[Country](fileName)
+      _ <- transactor
+        .use { xa =>
+          HC.stream[Country](q, HPS.set(-1), 512)
+            .transact(xa)
+            .through(_.map(toCsv(_, true)))
+            .through(text.utf8Encode)
+            .through(io.file.writeAll[IO](Paths.get(fileName), blockingExecutionContext, Seq(StandardOpenOption.APPEND)))
+            .compile
+            .drain
+        }
+      //TODO workaround for https://github.com/functional-streams-for-scala/fs2/pull/1381
+      size <- IO(new File(fileName).length())
+      _    <- if (size == 0) Util.writeIttoHeaderTofile[Country](fileName) else IO.unit
+    } yield ()
+
+    o.unsafeRunSync()
+    val lines = scala.io.Source.fromFile(fileName).getLines.mkString("\n")
+    assert(lines == "code,name,pop,gnp")
+
+  }
 }
