@@ -23,13 +23,5 @@ psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres
   
 ### run test
 ```
-sbt [-Dtmp_directory=dir] test
-
-default is /tmp
-
-example
-
 sbt test
-
-sbt -Dtmp_directory="/tmp" test
 ```
