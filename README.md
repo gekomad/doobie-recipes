@@ -11,16 +11,26 @@
 ### Database Setup
 
 The example code assumes a local PostgreSQL server with a postgres user 'postgres' and password 'pass1'
-```  
+```
+cd /tmp
 wget https://raw.githubusercontent.com/tpolecat/doobie/series/0.5.x/world.sql  
 sudo su postgres  
 psql -c "ALTER USER postgres  WITH PASSWORD 'pass1';"  
 psql -c 'create database world;' -U postgres  
 psql -c '\i world.sql' -d world -U postgres  
-psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres  
+ 
   
 ```  
-  
+- CSV
+- DDL
+- Error handling
+- Logging
+- Parameterized queries
+- Selectiong
+- Array
+- Statment fragments
+- Transactions
+
 ### run test
 ```
 sbt test

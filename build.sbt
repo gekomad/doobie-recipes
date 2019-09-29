@@ -1,24 +1,22 @@
 name := "doobie-recipes"
 
-version := "0.4.1"
+version := "0.5.0"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.1"
 
-scalacOptions += "-Ypartial-unification"
+scalacOptions += "-deprecation"
 
-lazy val doobieVersion = "0.6.0"
+lazy val doobieVersion = "0.8.2"
 
 libraryDependencies ++= Seq(
-  //doobie
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-postgres" % doobieVersion,
-  "org.tpolecat" %% "doobie-specs2" % doobieVersion,
   "org.tpolecat" %% "doobie-hikari" % doobieVersion,
 )
 
 // test
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0-M1" % Test
 
-libraryDependencies += "com.github.gekomad" %% "itto-csv" % "0.1.0"
+libraryDependencies += "com.github.gekomad" %% "itto-csv" % "1.0.0" % Test
 
 parallelExecution in Test := false

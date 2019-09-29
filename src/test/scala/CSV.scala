@@ -1,15 +1,20 @@
 import java.io.{File, FileInputStream, FileOutputStream, PrintWriter}
 import java.nio.file.StandardOpenOption
 
+import cats.effect.Blocker
 import com.github.gekomad.ittocsv.core.Header.csvHeader
 import com.github.gekomad.ittocsv.core.ParseFailure
-import org.scalatest.FunSuite
-
+import fs2.Stream
+import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.{Blocker, ExitCode, IO, IOApp, Resource}
+import cats.implicits._
+import fs2.{io, text, Stream}
+import java.nio.file.Paths
 import scala.util.Try
 
-class CSV extends FunSuite {
+class CSV extends AnyFunSuite {
 
-  import MyPredef.transactor
+  import Util.transactor
 
   case class Test2(field1: Int, field2: Option[String], field3: Option[Int])
 
@@ -31,11 +36,10 @@ class CSV extends FunSuite {
 
       import scala.concurrent.ExecutionContext
 
-      val blockingExecutionContext: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
-
       import cats.effect.ContextShift
 
-      implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+      implicit val ioContextShift: ContextShift[IO] =
+        IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
 
       import cats.implicits._
       import doobie.implicits._
@@ -48,12 +52,18 @@ class CSV extends FunSuite {
       implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
 
       //read from file N rows and store in db
-      def readCsvAndWriteDB[B: doobie.util.Read: doobie.util.Write: FieldNames: Schema](inOutFile: String, sql: String): IO[Unit] = {
+      def readCsvAndWriteDB[B: doobie.util.Read: doobie.util.Write: FieldNames: Schema](
+        inOutFile: String,
+        sql: String
+      ): IO[Unit] = {
         import cats.instances.list._
 
         import cats.syntax.traverse._
 
-        def bulkInsert[A: doobie.util.Read: doobie.util.Write: FieldNames: Schema](csvList: List[String], count: Long): Either[NonEmptyList[ParseFailure], IO[Int]] = {
+        def bulkInsert[A: doobie.util.Read: doobie.util.Write: FieldNames: Schema](
+          csvList: List[String],
+          count: Long
+        ): Either[NonEmptyList[ParseFailure], IO[Int]] = {
           val csv =
             if (count == 0)
               csvList.drop(1)
@@ -74,15 +84,18 @@ class CSV extends FunSuite {
           }
         }
 
-        io.file
-          .readAll[IO](Paths.get(inOutFile), blockingExecutionContext, 4096)
-          .through(text.utf8Decode)
-          .through(text.lines)
-          .chunkN(maxRowsToCommit)
-          .zipWithIndex
-          .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync))
-          .compile
-          .drain
+        val a = Stream.resource(Blocker[IO]).flatMap { blocker =>
+          io.file
+            .readAll[IO](Paths.get(inOutFile), blocker, 4096)
+            .through(text.utf8Decode)
+            .through(text.lines)
+            .chunkN(maxRowsToCommit)
+            .zipWithIndex
+            .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync))
+
+        }
+        a.compile.drain
+
       }
     }
 
@@ -100,7 +113,7 @@ class CSV extends FunSuite {
     import doobie.implicits._
 
     val nRecords  = 1000
-    val inOutFile = s"${MyPredef.tmpDir}/test2.csv"
+    val inOutFile = s"${Util.tmpDir}/test2.csv"
 
     import com.github.gekomad.ittocsv.core.Header.csvHeader
     import com.github.gekomad.ittocsv.core.ToCsv._
@@ -119,7 +132,8 @@ class CSV extends FunSuite {
       Test2(count, getRandomOptionString(10 + getRandomInt(100)), getRandomOptionInt(0, 2000))
     }
 
-    val content = test2List.foldLeft(csvHeader[Test2])((a, b) => a + IttoCSVFormat.default.recordSeparator + toCsv(b)).getBytes
+    val content =
+      test2List.foldLeft(csvHeader[Test2])((a, b) => a + IttoCSVFormat.default.recordSeparator + toCsv(b)).getBytes
 
     java.nio.file.Files.write(Paths.get(inOutFile), content)
 
@@ -143,7 +157,9 @@ class CSV extends FunSuite {
 
     assert(tableTest2 == Nil)
 
-    ReadCsvAndWriteDB.readCsvAndWriteDB[Test2](inOutFile, "insert into test2 (field1, field2, field3) values (?, ?, ?)").unsafeRunSync
+    ReadCsvAndWriteDB
+      .readCsvAndWriteDB[Test2](inOutFile, "insert into test2 (field1, field2, field3) values (?, ?, ?)")
+      .unsafeRunSync
 
     assert(tableTest2 == test2List)
     assert(tableTest2.size == nRecords)
@@ -167,7 +183,8 @@ class CSV extends FunSuite {
     import doobie.implicits._
     import doobie.util.Read
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
-    def mySelect[A: Read]: immutable.Seq[Any] =
+    def mySelect[A: Read]: immutable.Seq[Any] = {
+
       transactor
         .use { xa =>
           sql"select code, name, population, gnp from country"
@@ -177,6 +194,7 @@ class CSV extends FunSuite {
         }
         .unsafeRunSync
         .take(3)
+    }
 
     assert(
       mySelect[Country] == List(
@@ -190,18 +208,19 @@ class CSV extends FunSuite {
   test("spool csv Parameterized") {
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import java.nio.file.Paths
-    import java.util.concurrent.Executors
+
     import cats.effect.IO
     import doobie.implicits._
     import fs2.{io, text}
-    import scala.concurrent.ExecutionContext
+
     import doobie.{HC, HPS}
+
+    import com.github.gekomad.ittocsv.core.ToCsv._
+    implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
 
     import cats.effect.ContextShift
     implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
-    import com.github.gekomad.ittocsv.core.ToCsv._
-    implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
-    val blockingExecutionContext          = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
+
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
     val q =
       """
@@ -212,30 +231,35 @@ class CSV extends FunSuite {
       order by code
       limit 3
       """
-    val fileName = s"${MyPredef.tmpDir}/country2.out"
-
-    {
-      for {
-        _ <- Util.writeIttoHeaderTofile[Country](fileName)
-        _ <- transactor.use { xa =>
-          HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
-            .transact(xa)
-            .through(_.map(toCsv(_, true)))
-            .through(text.utf8Encode)
-            .through(io.file.writeAll[IO](Paths.get(fileName), blockingExecutionContext, Seq(StandardOpenOption.APPEND)))
-            .compile
-            .drain
-        }
-      } yield ()
-    }.unsafeRunSync()
-
-    val lines = scala.io.Source.fromFile(fileName).getLines.mkString("\n")
-    assert(
-      lines ==
-        """code,name,pop,gnp
+    val fileName = s"${Util.tmpDir}/country2.out"
+    val a1 = Stream.resource(Blocker[IO]).map { blocker =>
+      val o = {
+        for {
+          _ <- Util.writeIttoHeaderTofile[Country](fileName)
+          _ <- transactor.use { xa =>
+            HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
+              .transact(xa)
+              .through(_.map(toCsv(_, printRecordSeparator = true)))
+              .through(text.utf8Encode)
+              .through(io.file.writeAll[IO](Paths.get(fileName), blocker, Seq(StandardOpenOption.APPEND)))
+              .compile
+              .drain
+          }
+        } yield ()
+      }
+      o.unsafeRunSync()
+      val f     = scala.io.Source.fromFile(fileName)
+      val lines = f.getLines.mkString("\n")
+      f.close()
+      assert(
+        lines ==
+          """code,name,pop,gnp
           |BRA,Brazil,170115000,776739.0
           |PAK,Pakistan,156483000,61289.0""".stripMargin
-    )
+      )
+
+    }
+    a1
   }
 
   test("spool empty csv Parameterized") {
@@ -252,36 +276,36 @@ class CSV extends FunSuite {
     implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
     import com.github.gekomad.ittocsv.core.ToCsv._
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
-    val blockingExecutionContext          = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(2))
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
+
     val q =
       """
       select code, name, population, gnp
       from country
       where population < ?
       """
-    val fileName = s"${MyPredef.tmpDir}/country2.out"
+    val fileName = s"${Util.tmpDir}/country2.out"
+    Stream.resource(Blocker[IO]).map { blocker =>
+      val o = for {
+        _ <- Util.writeIttoHeaderTofile[Country](fileName)
+        _ <- transactor
+          .use { xa =>
+            HC.stream[Country](q, HPS.set(-1), 512)
+              .transact(xa)
+              .through(_.map(toCsv(_, printRecordSeparator = true)))
+              .through(text.utf8Encode)
+              .through(io.file.writeAll[IO](Paths.get(fileName), blocker, Seq(StandardOpenOption.APPEND)))
+              .compile
+              .drain
+          }
+      } yield ()
 
-    val o = for {
-      _ <- Util.writeIttoHeaderTofile[Country](fileName)
-      _ <- transactor
-        .use { xa =>
-          HC.stream[Country](q, HPS.set(-1), 512)
-            .transact(xa)
-            .through(_.map(toCsv(_, true)))
-            .through(text.utf8Encode)
-            .through(io.file.writeAll[IO](Paths.get(fileName), blockingExecutionContext, Seq(StandardOpenOption.APPEND)))
-            .compile
-            .drain
-        }
-      //TODO workaround for https://github.com/functional-streams-for-scala/fs2/pull/1381
-      size <- IO(new File(fileName).length())
-      _    <- if (size == 0) Util.writeIttoHeaderTofile[Country](fileName) else IO.unit
-    } yield ()
+      o.unsafeRunSync()
+      val f     = scala.io.Source.fromFile(fileName)
+      val lines = f.getLines.mkString("\n")
+      f.close()
+      assert(lines == "code,name,pop,gnp")
 
-    o.unsafeRunSync()
-    val lines = scala.io.Source.fromFile(fileName).getLines.mkString("\n")
-    assert(lines == "code,name,pop,gnp")
-
+    }
   }
 }

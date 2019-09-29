@@ -1,8 +1,8 @@
-import MyPredef.transactor
+import Util.transactor
 import cats.effect.IO
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class Logging extends FunSuite {
+class Logging extends AnyFunSuite {
 
   case class Person(id: Int, name: String)
 

@@ -4,12 +4,13 @@ import doobie.Fragments
 import doobie.enum.SqlState
 import doobie.free.connection
 import doobie.hikari.HikariTransactor
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
+import Util._
 
-class Transaction extends FunSuite {
+class Transaction extends AnyFunSuite {
 
   test("transaction ko") {
-    import MyPredef.transactor
+
     import doobie.implicits._
 
     case class City(id: Long, name: String, countrycode: String, district: String, population: Int)
@@ -55,7 +56,7 @@ class Transaction extends FunSuite {
   }
 
   test("transaction ok") {
-    import MyPredef.transactor
+
     import doobie.implicits._
 
     case class City(id: Long, name: String, countrycode: String, district: String, population: Int)

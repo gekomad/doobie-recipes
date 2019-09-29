@@ -4,14 +4,13 @@ import com.github.gekomad.ittocsv.core.FromCsv
 import com.github.gekomad.ittocsv.core.Schema
 import com.github.gekomad.ittocsv.core.Header.FieldNames
 import doobie.free.connection.ConnectionIO
-import org.scalatest.FunSuite
-
+import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.immutable
 import scala.concurrent.ExecutionContextExecutorService
+import Util._
 
-class DDL extends FunSuite {
+class DDL extends AnyFunSuite {
 
-  import MyPredef.{createTablePerson, transactor}
   import cats.implicits._
   import doobie.implicits._
 
@@ -23,7 +22,8 @@ class DDL extends FunSuite {
 
     //insert
     import doobie.util.update.Update0
-    def insert1(name: String, age: Option[Short]): Update0 = sql"insert into person (name, age) values ($name, $age)".update
+    def insert1(name: String, age: Option[Short]): Update0 =
+      sql"insert into person (name, age) values ($name, $age)".update
 
     assert(transactor.use { xa =>
       insert1("Alice", Some(12)).run.transact(xa)

@@ -1,10 +1,9 @@
-import MyPredef.transactor
-import org.scalatest.FunSuite
+import Util._
+import org.scalatest.funsuite.AnyFunSuite
 
-class SQLArrays extends FunSuite {
+class SQLArrays extends AnyFunSuite {
 
   import doobie.postgres.implicits._
-  import MyPredef.createTablePersonPets
 
   test("SQL Arrays") {
 

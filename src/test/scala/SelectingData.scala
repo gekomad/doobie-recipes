@@ -2,13 +2,13 @@ import cats.effect._
 import com.github.gekomad.ittocsv.parser.IttoCSVFormat
 import doobie.implicits._
 import doobie.util.Read
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.immutable
 
-class SelectingData extends FunSuite {
+class SelectingData extends AnyFunSuite {
 
-  import MyPredef.transactor
+  import Util.transactor
 
   case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
@@ -33,8 +33,12 @@ class SelectingData extends FunSuite {
     {
       //generic
 
-      assert(toCsvL(o) == "code,name,pop,gnp\r\nAFG,Afghanistan,22720000,5976.0\r\nNLD,Netherlands,15864000,371362.0\r\nANT,Netherlands Antilles,217000,1941.0")
-      assert(toCsv(o) == "AFG,Afghanistan,22720000,5976.0,NLD,Netherlands,15864000,371362.0,ANT,Netherlands Antilles,217000,1941.0")
+      assert(
+        toCsvL(o) == "code,name,pop,gnp\r\nAFG,Afghanistan,22720000,5976.0\r\nNLD,Netherlands,15864000,371362.0\r\nANT,Netherlands Antilles,217000,1941.0"
+      )
+      assert(
+        toCsv(o) == "AFG,Afghanistan,22720000,5976.0,NLD,Netherlands,15864000,371362.0,ANT,Netherlands Antilles,217000,1941.0"
+      )
     }
 
     {
@@ -42,7 +46,9 @@ class SelectingData extends FunSuite {
       import com.github.gekomad.ittocsv.core.ToCsv._
       implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.tab
       val p                                 = toCsvL(o)
-      assert(p == "code\tname\tpop\tgnp\r\nAFG\tAfghanistan\t22720000\t5976.0\r\nNLD\tNetherlands\t15864000\t371362.0\r\nANT\tNetherlands Antilles\t217000\t1941.0")
+      assert(
+        p == "code\tname\tpop\tgnp\r\nAFG\tAfghanistan\t22720000\t5976.0\r\nNLD\tNetherlands\t15864000\t371362.0\r\nANT\tNetherlands Antilles\t217000\t1941.0"
+      )
     }
   }
 
@@ -91,7 +97,13 @@ class SelectingData extends FunSuite {
       .unsafeRunSync // List[(String, String, Int, Option[Double])]
       .take(3) // List[(String, String, Int, Option[Double])]
 
-    assert(mySelect == List(("AFG", "Afghanistan", 22720000, Some(5976.0)), ("NLD", "Netherlands", 15864000, Some(371362.0)), ("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
+    assert(
+      mySelect == List(
+        ("AFG", "Afghanistan", 22720000, Some(5976.0)),
+        ("NLD", "Netherlands", 15864000, Some(371362.0)),
+        ("ANT", "Netherlands Antilles", 217000, Some(1941.0))
+      )
+    )
   }
 
   test("row mappings") {
@@ -154,7 +166,11 @@ class SelectingData extends FunSuite {
       .take(3) // List[Country]]
 
     assert(
-      mySelect == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0)))
+      mySelect == List(
+        Country("AFG", "Afghanistan", 22720000, Some(5976.0)),
+        Country("NLD", "Netherlands", 15864000, Some(371362.0)),
+        Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))
+      )
     )
   }
 
@@ -189,22 +205,15 @@ class SelectingData extends FunSuite {
 
     val mySelect: Map[Code, Country] = transactor
       .use { xa =>
-        sql"select code, name, population, gnp from country"
+        sql"select code, name, population, gnp from country where code='ABW'"
           .query[(Code, Country)]
           .to[List] // ConnectionIO[List[(Code, Country)]]
           .transact(xa) // IO[List[(Code, Country)]]
       }
-      .map(_.toMap)  //IO[Map[Code, Country]]
+      .map(_.toMap) //IO[Map[Code, Country]]
       .unsafeRunSync // IO[Map[Code, Country]]
-      .take(3) // IO[Map[Code, Country]]
 
-    assert(
-      mySelect == Map(
-        Code("IRL") -> Country("Ireland", 3775100, Some(75921.0)),
-        Code("SLV") -> Country("El Salvador", 6276000, Some(11863.0)),
-        Code("GTM") -> Country("Guatemala", 11385000, Some(19008.0))
-      )
-    )
+    assert(mySelect == Map(Code("ABW") -> Country("Aruba", 103000, Some(828.00))))
   }
 
   test("streaming") {
@@ -218,11 +227,17 @@ class SelectingData extends FunSuite {
 
     val o: immutable.Seq[Country] = mySelect.unsafeRunSync.take(3)
 
-    assert(o == List(Country("AFG", "Afghanistan", 22720000, Some(5976.0)), Country("NLD", "Netherlands", 15864000, Some(371362.0)), Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))))
+    assert(
+      o == List(
+        Country("AFG", "Afghanistan", 22720000, Some(5976.0)),
+        Country("NLD", "Netherlands", 15864000, Some(371362.0)),
+        Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))
+      )
+    )
   }
 
   test("join") {
-    import MyPredef.transactor
+
     import doobie.implicits._
 
     case class Country(name: String, code: String)
@@ -242,7 +257,12 @@ class SelectingData extends FunSuite {
         .transact(xa)
     }
 
-    assert(join.unsafeRunSync.take(2) == List((Country("Zimbabwe", "ZWE"), Some(City("Harare", "Harare"))), (Country("Zambia", "ZMB"), Some(City("Lusaka", "Lusaka")))))
+    assert(
+      join.unsafeRunSync.take(2) == List(
+        (Country("Zimbabwe", "ZWE"), Some(City("Harare", "Harare"))),
+        (Country("Zambia", "ZMB"), Some(City("Lusaka", "Lusaka")))
+      )
+    )
 
   }
 

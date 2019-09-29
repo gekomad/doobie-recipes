@@ -1,9 +1,8 @@
-import MyPredef.transactor
-
+import Util.transactor
 import doobie.implicits._
-import org.scalatest.FunSuite
+import org.scalatest.funsuite.AnyFunSuite
 
-class ParameterizedQueries extends FunSuite {
+class ParameterizedQueries extends AnyFunSuite {
 
   case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
@@ -25,7 +24,12 @@ class ParameterizedQueries extends FunSuite {
 
     val mySelect = biggerThan(150000000)
 
-    assert(mySelect == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("IDN", "Indonesia", 212107000, Some(84982.0))))
+    assert(
+      mySelect == List(
+        Country("BRA", "Brazil", 170115000, Some(776739.0)),
+        Country("IDN", "Indonesia", 212107000, Some(84982.0))
+      )
+    )
 
   }
 
@@ -55,7 +59,12 @@ class ParameterizedQueries extends FunSuite {
       .unsafeRunSync // List[Country]]
       .take(2) // List[Country]]ConnectionIO
 
-    assert(mySelect == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("PAK", "Pakistan", 156483000, Some(61289.0))))
+    assert(
+      mySelect == List(
+        Country("BRA", "Brazil", 170115000, Some(776739.0)),
+        Country("PAK", "Pakistan", 156483000, Some(61289.0))
+      )
+    )
 
   }
 
@@ -79,7 +88,12 @@ class ParameterizedQueries extends FunSuite {
       populationIn(150000000 to 200000000).compile.toList.transact(xa)
     }
 
-    assert(x.unsafeRunSync() == List(Country("BRA", "Brazil", 170115000, Some(776739.0)), Country("PAK", "Pakistan", 156483000, Some(61289.0))))
+    assert(
+      x.unsafeRunSync() == List(
+        Country("BRA", "Brazil", 170115000, Some(776739.0)),
+        Country("PAK", "Pakistan", 156483000, Some(61289.0))
+      )
+    )
 
   }
 

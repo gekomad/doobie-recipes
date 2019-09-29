@@ -1,9 +1,9 @@
-import MyPredef.transactor
-import org.scalatest.FunSuite
+import Util.transactor
+import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.immutable
 
-class StatementFragments extends FunSuite {
+class StatementFragments extends AnyFunSuite {
 
   test("select with fragments") {
     import cats.implicits._
@@ -39,9 +39,21 @@ class StatementFragments extends FunSuite {
 
     }
 
-    assert(select2Rows(None, None, Nil, 10) == List(Info("Afghanistan", "AFG", 22720000), Info("Netherlands", "NLD", 15864000)))
-    assert(select2Rows(Some("U%"), None, Nil, 10) == List(Info("United Arab Emirates", "ARE", 2441000), Info("United Kingdom", "GBR", 59623400)))
-    assert(select2Rows(Some("U%"), Some(12345), List("FRA", "GBR"), 10) == List(Info("United Kingdom", "GBR", 59623400)))
+    assert(
+      select2Rows(None, None, Nil, 10) == List(
+        Info("Afghanistan", "AFG", 22720000),
+        Info("Netherlands", "NLD", 15864000)
+      )
+    )
+    assert(
+      select2Rows(Some("U%"), None, Nil, 10) == List(
+        Info("United Arab Emirates", "ARE", 2441000),
+        Info("United Kingdom", "GBR", 59623400)
+      )
+    )
+    assert(
+      select2Rows(Some("U%"), Some(12345), List("FRA", "GBR"), 10) == List(Info("United Kingdom", "GBR", 59623400))
+    )
   }
 
 }

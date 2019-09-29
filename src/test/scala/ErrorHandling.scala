@@ -1,8 +1,8 @@
 import doobie.free.connection.ConnectionIO
-import org.scalatest.FunSuite
-import MyPredef.{createTablePerson, transactor}
+import org.scalatest.funsuite.AnyFunSuite
+import Util._
 
-class ErrorHandling extends FunSuite {
+class ErrorHandling extends AnyFunSuite {
 
   case class Person(id: Int, name: String)
 
