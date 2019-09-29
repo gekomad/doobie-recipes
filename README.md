@@ -8,19 +8,6 @@
 </table>      
       
   
-### Database Setup
-
-The example code assumes a local PostgreSQL server with a postgres user 'postgres' and password 'pass1'
-```
-cd /tmp
-wget https://raw.githubusercontent.com/tpolecat/doobie/series/0.5.x/world.sql  
-sudo su postgres  
-psql -c "ALTER USER postgres  WITH PASSWORD 'pass1';"  
-psql -c 'create database world;' -U postgres  
-psql -c '\i world.sql' -d world -U postgres  
- 
-  
-```  
 - CSV
 - DDL
 - Error handling
@@ -30,6 +17,25 @@ psql -c '\i world.sql' -d world -U postgres
 - Array
 - Statment fragments
 - Transactions
+
+  
+### Database Setup
+
+The test code assumes a local PostgreSQL server with a postgres user 'postgres' and password 'pass1'
+```
+cd /tmp
+
+wget https://raw.githubusercontent.com/tpolecat/doobie/series/0.5.x/world.sql
+  
+sudo su postgres
+  
+psql -c "ALTER USER postgres  WITH PASSWORD 'pass1';"
+  
+psql -c 'create database world;' -U postgres
+  
+psql -c '\i world.sql' -d world -U postgres  
+  
+```
 
 ### run test
 ```
