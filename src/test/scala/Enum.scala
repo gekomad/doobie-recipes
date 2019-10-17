@@ -5,8 +5,6 @@ import doobie.util.{Get, Put}
 
 class MyEnum extends AnyFunSuite {
 
-  sealed trait ProductType
-
   object ProductType extends Enumeration {
     type ProductType = Value
 
