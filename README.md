@@ -32,7 +32,7 @@ sudo su postgres
 psql -c "ALTER USER postgres  WITH PASSWORD 'pass1';"
   
 psql -c 'create database world;' -U postgres
-  
+psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres  
 psql -c '\i world.sql' -d world -U postgres  
   
 ```

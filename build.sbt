@@ -6,7 +6,7 @@ scalaVersion := "2.13.1"
 
 scalacOptions += "-deprecation"
 
-lazy val doobieVersion = "0.8.2"
+lazy val doobieVersion = "0.8.4"
 
 libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-core" % doobieVersion,

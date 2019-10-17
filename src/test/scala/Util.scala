@@ -52,6 +52,22 @@ object Util {
       )
     } yield xa
 
+  def createTableTableEnum: Int = {
+    val drop = sql"""DROP TABLE IF EXISTS table_enum""".update.run
+
+    val create =
+      sql"""
+        CREATE TABLE table_enum (
+        id   int,
+        product_type VARCHAR NOT NULL        
+        )
+      """.update.run
+
+    transactor.use { xa =>
+      (drop, create).mapN(_ + _).transact(xa)
+    }.unsafeRunSync
+  }
+
   def createTablePerson: Int = {
     val drop = sql"""DROP TABLE IF EXISTS person""".update.run
 
