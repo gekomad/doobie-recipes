@@ -4,10 +4,9 @@
 <td align="left">        
 <img src="https://cdn.rawgit.com/tpolecat/doobie/series/0.5.x/doobie_logo.svg" width="90">  
 </td>      
-</tr>      
-</table>      
-      
-  
+</table>
+        
+        
 - CSV
 - DDL
 - Error handling
@@ -19,7 +18,8 @@
 - Transactions
 
 
-### run test with docker
+### Run test with docker
 ```
-./test.sh
+docker run -d --name doobie_recipies -p5435:5432 -d tpolecat/skunk-world
+sbt test
 ```

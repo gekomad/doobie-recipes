@@ -1,12 +1,6 @@
-import cats.data.NonEmptyList
-import com.github.gekomad.ittocsv.parser.IttoCSVFormat
-import com.github.gekomad.ittocsv.core.FromCsv
-import com.github.gekomad.ittocsv.core.Schema
-import com.github.gekomad.ittocsv.core.Header.FieldNames
 import doobie.free.connection.ConnectionIO
 import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.immutable
-import scala.concurrent.ExecutionContextExecutorService
 import Util._
 
 class DDL extends AnyFunSuite {

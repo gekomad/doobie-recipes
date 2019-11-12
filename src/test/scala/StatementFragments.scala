@@ -1,6 +1,5 @@
 import Util.transactor
 import org.scalatest.funsuite.AnyFunSuite
-
 import scala.collection.immutable
 
 class StatementFragments extends AnyFunSuite {

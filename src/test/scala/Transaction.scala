@@ -1,7 +1,5 @@
 import cats.effect.{IO, Resource}
 import cats.free.Free
-import doobie.Fragments
-import doobie.enum.SqlState
 import doobie.free.connection
 import doobie.hikari.HikariTransactor
 import org.scalatest.funsuite.AnyFunSuite

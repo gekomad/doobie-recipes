@@ -1,8 +1,8 @@
 import java.nio.file.StandardOpenOption
-
+import cats.implicits._
 import org.scalatest.funsuite.AnyFunSuite
 import Util._
-import cats.effect.Blocker
+import cats.effect.{Blocker, ExitCode}
 import fs2.Stream
 
 class IttoCSV extends AnyFunSuite {
@@ -23,9 +23,9 @@ class IttoCSV extends AnyFunSuite {
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
     val fileName = s"${Util.tmpDir}/country1.out"
-
+    Util.deleteFile(fileName)
     val q = "select code, name, population, gnp from country order by code limit 3"
-    Stream.resource(Blocker[IO]).map { blocker =>
+    val x = Stream.resource(Blocker[IO]).map { blocker =>
       {
         for {
           _ <- Util.writeIttoHeaderTofile[Country](fileName)
@@ -44,18 +44,19 @@ class IttoCSV extends AnyFunSuite {
 
             }
         } yield ()
-      }
+      }.unsafeRunSync()
     }
+
+    x.compile.drain.as(ExitCode.Success).unsafeRunSync()
     val f     = scala.io.Source.fromFile(fileName)
     val lines = f.getLines.mkString("\n")
     f.close()
     assert(
       lines ==
         """code,name,pop,gnp
-        |ABW,Aruba,103000,828.0
-        |AFG,Afghanistan,22720000,5976.0
-        |AGO,Angola,12878000,6648.0""".stripMargin
+          |ABW,Aruba,103000,828.0
+          |AFG,Afghanistan,22720000,5976.0
+          |AGO,Angola,12878000,6648.0""".stripMargin
     )
   }
-
 }

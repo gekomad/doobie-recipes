@@ -3,7 +3,6 @@ import com.github.gekomad.ittocsv.parser.IttoCSVFormat
 import doobie.implicits._
 import doobie.util.Read
 import org.scalatest.funsuite.AnyFunSuite
-
 import scala.collection.immutable
 
 class SelectingData extends AnyFunSuite {
@@ -72,6 +71,17 @@ class SelectingData extends AnyFunSuite {
         Country("ANT", "Netherlands Antilles", 217000, Some(1941.0))
       )
     )
+  }
+
+  test("select count") {
+    val mySelect = transactor.use { xa =>
+      sql"select count(1) from country"
+        .query[Int] // Query0[String]
+        .unique
+        .transact(xa)
+    }
+
+    assert(mySelect.unsafeRunSync == 239)
   }
 
   test("select one column") {

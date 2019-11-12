@@ -1,16 +1,9 @@
-import java.io.{File, FileInputStream, FileOutputStream, PrintWriter}
 import java.nio.file.StandardOpenOption
-
-import cats.effect.Blocker
-import com.github.gekomad.ittocsv.core.Header.csvHeader
 import com.github.gekomad.ittocsv.core.ParseFailure
-import fs2.Stream
 import org.scalatest.funsuite.AnyFunSuite
-import cats.effect.{Blocker, ExitCode, IO, IOApp, Resource}
+import cats.effect.{Blocker, ExitCode}
 import cats.implicits._
-import fs2.{io, text, Stream}
-import java.nio.file.Paths
-import scala.util.Try
+import fs2.Stream
 
 class CSV extends AnyFunSuite {
 
@@ -23,19 +16,11 @@ class CSV extends AnyFunSuite {
 
       import cats.data.NonEmptyList
       import com.github.gekomad.ittocsv.parser.IttoCSVFormat
-      import scala.collection.immutable
-      import scala.concurrent.ExecutionContextExecutorService
-
-      import com.github.gekomad.ittocsv.core.Header.{FieldNames, csvHeader}
+      import com.github.gekomad.ittocsv.core.Header.FieldNames
       import java.nio.file.Paths
-      import java.util.concurrent.Executors
-      import com.github.gekomad.ittocsv.core.FromCsv
       import com.github.gekomad.ittocsv.core.Schema
       import cats.effect.IO
       import fs2.{io, text}
-
-      import scala.concurrent.ExecutionContext
-
       import cats.effect.ContextShift
 
       implicit val ioContextShift: ContextShift[IO] =
@@ -104,7 +89,6 @@ class CSV extends AnyFunSuite {
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import RandomUtil._
     import cats.effect.IO
-
     import cats.effect.ContextShift
 
     implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
@@ -151,7 +135,7 @@ class CSV extends AnyFunSuite {
       """.update.run
 
       transactor.use { xa =>
-        (drop, create).mapN(_ + _).transact(xa)
+        (drop *> create).transact(xa)
       }.unsafeRunSync
     })
 
@@ -232,44 +216,43 @@ class CSV extends AnyFunSuite {
       limit 3
       """
     val fileName = s"${Util.tmpDir}/country2.out"
+    Util.deleteFile(fileName)
     val a1 = Stream.resource(Blocker[IO]).map { blocker =>
-      val o = {
+      {
         for {
           _ <- Util.writeIttoHeaderTofile[Country](fileName)
-          _ <- transactor.use { xa =>
-            HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
-              .transact(xa)
-              .through(_.map(toCsv(_, printRecordSeparator = true)))
-              .through(text.utf8Encode)
-              .through(io.file.writeAll[IO](Paths.get(fileName), blocker, Seq(StandardOpenOption.APPEND)))
-              .compile
-              .drain
-          }
+          _ <- transactor
+            .use { xa =>
+              HC.stream[Country](q, HPS.set((150000000, 200000000)), 512)
+                .transact(xa)
+                .through(_.map(toCsv(_, printRecordSeparator = true)))
+                .through(text.utf8Encode)
+                .through(io.file.writeAll[IO](Paths.get(fileName), blocker, Seq(StandardOpenOption.APPEND)))
+                .compile
+                .drain
+            }
         } yield ()
-      }
-      o.unsafeRunSync()
-      val f     = scala.io.Source.fromFile(fileName)
-      val lines = f.getLines.mkString("\n")
-      f.close()
-      assert(
-        lines ==
-          """code,name,pop,gnp
-          |BRA,Brazil,170115000,776739.0
-          |PAK,Pakistan,156483000,61289.0""".stripMargin
-      )
+      }.unsafeRunSync()
 
     }
-    a1
+    a1.compile.drain.as(ExitCode.Success).unsafeRunSync()
+    val f     = scala.io.Source.fromFile(fileName)
+    val lines = f.getLines.mkString("\n")
+    f.close()
+    assert(
+      lines ==
+        """code,name,pop,gnp
+          |BRA,Brazil,170115000,776739.0
+          |PAK,Pakistan,156483000,61289.0""".stripMargin
+    )
   }
 
   test("spool empty csv Parameterized") {
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import java.nio.file.Paths
-    import java.util.concurrent.Executors
     import cats.effect.IO
     import doobie.implicits._
     import fs2.{io, text}
-    import scala.concurrent.ExecutionContext
     import doobie.{HC, HPS}
 
     import cats.effect.ContextShift

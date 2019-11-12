@@ -12,11 +12,8 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-core" % doobieVersion,
   "org.tpolecat" %% "doobie-postgres" % doobieVersion,
   "org.tpolecat" %% "doobie-hikari" % doobieVersion,
+  "org.scalatest" %% "scalatest" % "3.2.0-M1" % Test,
+  "com.github.gekomad" %% "itto-csv" % "1.0.0" % Test
 )
-
-// test
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.0-M1" % Test
-
-libraryDependencies += "com.github.gekomad" %% "itto-csv" % "1.0.0" % Test
 
 parallelExecution in Test := false
