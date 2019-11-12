@@ -44,9 +44,9 @@ object Util {
       te <- Blocker[IO]                               // our transaction EC
       xa <- HikariTransactor.newHikariTransactor[IO](
         "org.postgresql.Driver", // driver classname
-        "jdbc:postgresql:world", // connect URL
+        "jdbc:postgresql://localhost:5435/world", // connect URL
         "postgres", // username
-        "pass1", // password
+        "", // password
         ce, // await connection here
         te // execute JDBC operations here
       )
