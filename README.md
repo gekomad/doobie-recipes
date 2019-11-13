@@ -16,6 +16,8 @@ $ psql -c 'create user postgres createdb'
 $ psql -c 'create database world;' -U postgres
 $ psql -c '\i world.sql' -d world -U postgres
 $ psql -d world -c "create type myenum as enum ('foo', 'bar')" -U postgres
+
+sbt test
 ```
 
 ### Run test with docker
