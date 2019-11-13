@@ -1,4 +1,4 @@
-import Util.transactor
+import doobierecipes.Transactor._
 import cats.effect.IO
 import org.scalatest.funsuite.AnyFunSuite
 

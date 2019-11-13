@@ -3,7 +3,7 @@ import cats.free.Free
 import doobie.free.connection
 import doobie.hikari.HikariTransactor
 import org.scalatest.funsuite.AnyFunSuite
-import Util._
+import doobierecipes.Transactor._
 
 class Transaction extends AnyFunSuite {
 

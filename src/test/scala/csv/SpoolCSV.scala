@@ -1,28 +1,35 @@
-import java.nio.file.StandardOpenOption
-import cats.implicits._
-import org.scalatest.funsuite.AnyFunSuite
-import Util._
-import cats.effect.{Blocker, ExitCode}
-import fs2.Stream
+package csv
 
-class IttoCSV extends AnyFunSuite {
+import java.nio.file.StandardOpenOption
+
+import cats.effect.{Blocker, ExitCode}
+import cats.implicits._
+import doobierecipes.Transactor._
+import doobierecipes.Util
+import fs2.Stream
+import org.scalatest.funsuite.AnyFunSuite
+
+/**
+* create the file country1.csv reading country table
+ */
+class SpoolCSV extends AnyFunSuite {
 
   case class Test2(field1: Int, field2: Option[String], field3: Option[Int])
 
   test("spool csv") {
     import java.nio.file.Paths
-    import cats.effect.{ContextShift, IO}
+
+    import cats.effect.IO
+    import com.github.gekomad.ittocsv.core.ToCsv._
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import doobie.implicits._
     import doobie.util.fragment.Fragment
     import fs2.{io, text}
-
-    import com.github.gekomad.ittocsv.core.ToCsv._
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
 
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
 
-    val fileName = s"${Util.tmpDir}/country1.out"
+    val fileName = s"${Util.tmpDir}/country1.csv"
     Util.deleteFile(fileName)
     val q = "select code, name, population, gnp from country order by code limit 3"
     val x = Stream.resource(Blocker[IO]).map { blocker =>

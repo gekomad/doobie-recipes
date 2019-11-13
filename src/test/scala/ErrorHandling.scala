@@ -1,15 +1,22 @@
 import doobie.free.connection.ConnectionIO
 import org.scalatest.funsuite.AnyFunSuite
-import Util._
+import doobierecipes.Util._
+import doobierecipes.Transactor._
+import org.scalatest.BeforeAndAfterAll
 
-class ErrorHandling extends AnyFunSuite {
+class ErrorHandling extends AnyFunSuite with BeforeAndAfterAll {
+
+  /**
+    * CREATE TABLE person (
+    * id   SERIAL,
+    * name VARCHAR NOT NULL UNIQUE,
+    * age  SMALLINT)
+    */
+  override def beforeAll() = dropCreateTablePerson()
 
   case class Person(id: Int, name: String)
 
   test("error Handling") {
-
-    //create table
-    assert(createTablePerson == 0)
 
     import doobie.implicits._
 
@@ -40,7 +47,5 @@ class ErrorHandling extends AnyFunSuite {
         .unsafeRunSync
         .isLeft
     )
-
   }
-
 }

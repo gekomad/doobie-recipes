@@ -1,9 +1,18 @@
-import Util.transactor
+import doobierecipes.Transactor._
 import doobie.implicits._
 import org.scalatest.funsuite.AnyFunSuite
 import doobie.util.{Get, Put}
+import doobierecipes.Util._
+import org.scalatest.BeforeAndAfterAll
 
-class MyEnum extends AnyFunSuite {
+class MyEnum extends AnyFunSuite with BeforeAndAfterAll {
+
+  /**
+    * CREATE TABLE table_enum (
+    * id   int,
+    * product_type VARCHAR NOT NULL)
+    */
+  override def beforeAll() = dropCreateTableTableEnum()
 
   object ProductType extends Enumeration {
     type ProductType = Value
@@ -23,9 +32,6 @@ class MyEnum extends AnyFunSuite {
   case class TableEnum(id: Int, productType: ProductType.Value)
 
   test("insert and read enum") {
-
-    //create table
-    assert(Util.createTableTableEnum == 0)
 
     //insert
     import doobie.util.update.Update0

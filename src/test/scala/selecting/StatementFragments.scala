@@ -1,14 +1,17 @@
-import Util.transactor
+package selecting
+
+import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
+
 import scala.collection.immutable
 
 class StatementFragments extends AnyFunSuite {
 
   test("select with fragments") {
     import cats.implicits._
-
-    import doobie._, doobie.implicits._
+    import doobie._
     import Fragments.{in, whereAndOpt}
+    import doobie.implicits._
 
     // Country Info
     case class Info(name: String, code: String, population: Int)
