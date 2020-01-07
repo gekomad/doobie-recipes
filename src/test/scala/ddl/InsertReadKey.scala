@@ -18,7 +18,7 @@ class InsertReadKey extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll() = dropCreateTablePerson()
+  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
 
   test("insert and read key") {
 

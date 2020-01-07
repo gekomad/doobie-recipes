@@ -24,6 +24,8 @@ sbt test
 ```
 docker run -d --name doobie_recipies -p5435:5432 -d tpolecat/skunk-world
 sbt test
+docker rm -f doobie_recipies
+
 ```
 
 - Selecting

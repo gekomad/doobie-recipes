@@ -99,7 +99,7 @@ class LoadCSV extends AnyFunSuite {
     import doobie.implicits._
 
     val nRecords  = 1000
-    val inOutFile = s"${tmpDir}/test2.csv"
+    val inOutFile = s"$tmpDir/test2.csv"
 
     import com.github.gekomad.ittocsv.core.Header.csvHeader
     import com.github.gekomad.ittocsv.core.ToCsv._

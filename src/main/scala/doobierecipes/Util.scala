@@ -27,7 +27,7 @@ object Util {
       IO.unit
     }
 
-  def dropCreateTableTableEnum(): Int = {
+  def dropCreateTableTableEnum(): IO[Int] = {
     val drop = sql"""DROP TABLE IF EXISTS table_enum""".update.run
 
     val create =
@@ -37,10 +37,10 @@ object Util {
 
     transactor.use { xa =>
       (drop *> create).transact(xa)
-    }.unsafeRunSync
+    }
   }
 
-  def dropCreateTablePerson(): Int = {
+  def dropCreateTablePerson(): IO[Int] = {
     val drop = sql"""DROP TABLE IF EXISTS person""".update.run
 
     val create =
@@ -53,10 +53,10 @@ object Util {
 
     transactor.use { xa =>
       (drop *> create).transact(xa)
-    }.unsafeRunSync
+    }
   }
 
-  def dropCreateTablePersonPets(): Int = {
+  def dropCreateTablePersonPets(): IO[Int] = {
     val drop = sql"DROP TABLE IF EXISTS person_pets".update.run
 
     val create =
@@ -68,6 +68,6 @@ object Util {
            | """.stripMargin.update.run
     transactor.use { xa =>
       (drop *> create).transact(xa)
-    }.unsafeRunSync
+    }
   }
 }

@@ -17,7 +17,7 @@ class InsertReadPerson extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll() = dropCreateTablePerson()
+  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync
 
   import doobie.implicits._
 

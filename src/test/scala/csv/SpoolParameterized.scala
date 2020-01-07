@@ -16,14 +16,13 @@ import cats.effect.ContextShift
 import cats.effect.{Blocker, ExitCode}
 
 /**
- * create the file country1.csv reading country table
- */
-
+  * create the file country1.csv reading country table
+  */
 class SpoolParameterized extends AnyFunSuite {
 
   test("spool csv Parameterized") {
 
-    implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
+    implicit val csvFormat: IttoCSVFormat         = IttoCSVFormat.default
     implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
 
     case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
@@ -36,7 +35,7 @@ class SpoolParameterized extends AnyFunSuite {
       order by code
       limit 3
       """
-    val fileName = s"${tmpDir}/country2.csv"
+    val fileName = s"$tmpDir/country2.csv"
     deleteFile(fileName)
     val a1 = Stream.resource(Blocker[IO]).map { blocker =>
       {
@@ -53,7 +52,7 @@ class SpoolParameterized extends AnyFunSuite {
                 .drain
             }
         } yield ()
-        }.unsafeRunSync()
+      }.unsafeRunSync()
 
     }
     a1.compile.drain.as(ExitCode.Success).unsafeRunSync()

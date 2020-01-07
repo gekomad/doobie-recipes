@@ -5,14 +5,14 @@ import doobie.util.{Get, Put}
 import doobierecipes.Util._
 import org.scalatest.BeforeAndAfterAll
 
-class MyEnum extends AnyFunSuite with BeforeAndAfterAll {
+class Enum extends AnyFunSuite with BeforeAndAfterAll {
 
   /**
     * CREATE TABLE table_enum (
     * id   int,
     * product_type VARCHAR NOT NULL)
     */
-  override def beforeAll() = dropCreateTableTableEnum()
+  override def beforeAll(): Unit = dropCreateTableTableEnum().unsafeRunSync
 
   object ProductType extends Enumeration {
     type ProductType = Value
