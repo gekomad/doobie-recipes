@@ -21,7 +21,7 @@ class InsertReadUpdate extends AnyFunSuite with BeforeAndAfterAll {
     */
   override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync
 
-  case class Person(id: Long, name: String, age: Option[Short])
+  case class Person(id: Int, name: String, age: Option[Short])
 
   test("insert read update") {
 

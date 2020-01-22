@@ -1,6 +1,6 @@
 name := "doobie-recipes"
 
-version := "0.6.1"
+version := "0.6.2"
 
 scalaVersion := "2.13.1"
 
@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
   "org.tpolecat"        %% "doobie-core"      % doobieVersion,
   "org.tpolecat"        %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat"        %% "doobie-hikari"    % doobieVersion,
-  "com.github.gekomad"  %% "itto-csv"         % "1.1.0",
+  "com.github.gekomad"  %% "itto-csv"         % "1.1.1",
   "org.scalatest"       %% "scalatest"        % "3.2.0-M2"      % Test
 )
 
