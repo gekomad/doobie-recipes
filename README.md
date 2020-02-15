@@ -8,6 +8,8 @@
 </td>      
 </table>
 
+[here](https://github.com/gekomad/skunk-recipes) Skunk recipes
+  
 ### Run test on local PostgreSQL (port 5435)
 
 ```
