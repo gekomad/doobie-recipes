@@ -8,9 +8,7 @@
 </td>      
 </table>
 
-[here](https://github.com/gekomad/skunk-recipes) Skunk recipes
-  
-### Run test on local PostgreSQL (port 5435)
+### Run test on local PostgreSQL
 
 ```
 $ curl -O https://raw.githubusercontent.com/tpolecat/doobie/series/0.7.x/world.sql
@@ -24,7 +22,7 @@ sbt test
 
 ### Run test with docker
 ```
-docker run -d --name doobie_recipies -p5435:5432 -d tpolecat/skunk-world
+docker run -d --name doobie_recipies -p5435:5432 -e POSTGRES_USER=postgres -e POSTGRES_DB=world -e POSTGRES_PASSWORD=postgres tpolecat/skunk-world
 sbt test
 docker rm -f doobie_recipies
 
@@ -53,6 +51,8 @@ docker rm -f doobie_recipies
     [Streaming](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/selecting/Streaming.scala)
     
     [StatementFragments](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/selecting/StatementFragments.scala)
+    
+    [Timestamp](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/selecting/Timestamp.scala)
     
 - Parameterized queries
 

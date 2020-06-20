@@ -18,7 +18,7 @@ object Transactor {
         "org.postgresql.Driver", // driver classname
         "jdbc:postgresql://localhost:5435/world", // connect URL
         "postgres", // username
-        "", // password
+        "postgres", // password
         ce, // await connection here
         te // execute JDBC operations here
       )

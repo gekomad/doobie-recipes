@@ -1,11 +1,8 @@
 package csv
 
 import java.nio.file.StandardOpenOption
-
 import cats.effect.Blocker
 import cats.implicits._
-import com.github.gekomad.ittocsv.core.CsvStringEncoder
-import com.github.gekomad.ittocsv.core.Header.FieldNames
 import doobierecipes.Transactor._
 import doobierecipes.Util
 import fs2.Stream
@@ -16,25 +13,32 @@ import org.scalatest.funsuite.AnyFunSuite
   */
 class SpoolCSV extends AnyFunSuite {
 
-  import java.nio.file.Paths
+  case class Test2(field1: Int, field2: Option[String], field3: Option[Int])
 
-  import cats.effect.IO
-  import com.github.gekomad.ittocsv.core.ToCsv._
-  import com.github.gekomad.ittocsv.parser.IttoCSVFormat
-  import doobie.implicits._
-  import doobie.util.fragment.Fragment
-  import fs2.{io, text}
-  implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
+  test("spool csv") {
+    import java.nio.file.Paths
 
-  def spool[A: doobie.util.Read: FieldNames: CsvStringEncoder](query: String, fileName: String): Stream[IO, IO[Unit]] =
-    Stream.resource(Blocker[IO]).map { blocker =>
+    import cats.effect.IO
+    import com.github.gekomad.ittocsv.core.ToCsv._
+    import com.github.gekomad.ittocsv.parser.IttoCSVFormat
+    import doobie.implicits._
+    import doobie.util.fragment.Fragment
+    import fs2.{io, text}
+    implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
+
+    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
+
+    val fileName = s"${Util.tmpDir}/country1.csv"
+    Util.deleteFile(fileName)
+    val q = "select code, name, population, gnp from country order by code limit 3"
+    val x: Stream[IO, IO[Unit]] = Stream.resource(Blocker[IO]).map { blocker =>
       for {
-        _ <- Util.writeIttoHeaderTofile[A](fileName)
+        _ <- Util.writeIttoHeaderTofile[Country](fileName)
         _ <- transactor
           .use { xa =>
             Fragment
-              .const(query)
-              .query[A]
+              .const(q)
+              .query[Country]
               .stream
               .transact(xa)
               .through(_.map(toCsv(_, printRecordSeparator = true)))
@@ -46,15 +50,7 @@ class SpoolCSV extends AnyFunSuite {
       } yield ()
     }
 
-  test("spool csv") {
-
-    val fileName = s"${Util.tmpDir}/country1.csv"
-    Util.deleteFile(fileName)
-
-    val q = "select code, name, population, gnp from country order by code limit 3"
-    case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
-
-    spool[Country](q, fileName).map(_.unsafeRunSync).compile.drain.unsafeRunSync
+    x.map(_.unsafeRunSync).compile.drain.unsafeRunSync
 
     val f     = scala.io.Source.fromFile(fileName)
     val lines = f.getLines.mkString("\n")

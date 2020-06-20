@@ -25,14 +25,14 @@ scalacOptions ++= Seq(
   "-Xfatal-warnings" // Fail the compilation if there are any warnings.
 )
 
-lazy val doobieVersion = "0.8.8"
+lazy val doobieVersion = "0.9.0"
 
 libraryDependencies ++= Seq(
   "org.tpolecat"        %% "doobie-core"      % doobieVersion,
   "org.tpolecat"        %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat"        %% "doobie-hikari"    % doobieVersion,
   "com.github.gekomad"  %% "itto-csv"         % "1.1.1",
-  "org.scalatest"       %% "scalatest"        % "3.2.0-M2"      % Test
+  "org.scalatest"       %% "scalatest"        % "3.3.0-SNAP2"      % Test
 )
 
 parallelExecution in Test := false
