@@ -8,7 +8,8 @@ class ShapelessRecord extends AnyFunSuite {
     import shapeless._
     import shapeless.record.Record
 
-    type Rec = Record.`'code -> String, 'name -> String, 'pop -> Int, 'gnp -> Option[Double]`.T
+    type Rec =
+      Record.`Symbol("code") -> String, Symbol("name") -> String, Symbol("pop") -> Int, Symbol("gnp") -> Option[Double]`.T
 
     val mySelect: Seq[Rec] = transactor
       .use { xa =>

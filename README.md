@@ -73,6 +73,8 @@ docker rm -f doobie_recipies
     [Insert Read and Update](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/ddl/InsertReadUpdate.scala)
     
     [SQLArrays](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/ddl/SQLArrays.scala)
+    
+    [Vacuum](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/ddl/Vacuum.scala)
 
 - Transactions
 

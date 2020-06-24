@@ -1,8 +1,8 @@
 name := "doobie-recipes"
 
-version := "0.6.2"
+version := "0.6.4"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.13.2"
 
 scalacOptions ++= Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
