@@ -79,7 +79,7 @@ class LoadCSV extends AnyFunSuite {
             .through(text.lines)
             .chunkN(maxRowsToCommit)
             .zipWithIndex
-            .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync))
+            .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync()))
 
         }
         a.compile.drain
@@ -106,12 +106,14 @@ class LoadCSV extends AnyFunSuite {
     implicit val csvFormat: IttoCSVFormat = IttoCSVFormat.default
 
     def tableTest2: List[Test2] =
-      doobierecipes.Transactor.transactor.use { xa =>
-        sql"select field1, field2, field3 from test2 order by 1"
-          .query[Test2]
-          .to[List]
-          .transact(xa)
-      }.unsafeRunSync
+      doobierecipes.Transactor.transactor
+        .use { xa =>
+          sql"select field1, field2, field3 from test2 order by 1"
+            .query[Test2]
+            .to[List]
+            .transact(xa)
+        }
+        .unsafeRunSync()
 
     //create csv file
     val test2List = (0 until nRecords).toList.map { count =>
@@ -135,16 +137,18 @@ class LoadCSV extends AnyFunSuite {
         )
       """.update.run
 
-      doobierecipes.Transactor.transactor.use { xa =>
-        (drop *> create).transact(xa)
-      }.unsafeRunSync
+      doobierecipes.Transactor.transactor
+        .use { xa =>
+          (drop *> create).transact(xa)
+        }
+        .unsafeRunSync()
     })
 
     assert(tableTest2 == Nil)
 
     ReadCsvAndWriteDB
       .readCsvAndWriteDB[Test2](inOutFile, "insert into test2 (field1, field2, field3) values (?, ?, ?)")
-      .unsafeRunSync
+      .unsafeRunSync()
 
     assert(tableTest2 == test2List)
     assert(tableTest2.size == nRecords)

@@ -74,6 +74,8 @@ docker rm -f doobie_recipies
     
     [SQLArrays](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/ddl/SQLArrays.scala)
     
+    [Rollback](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/ddl/Rollback.scala)
+    
     [Vacuum](https://github.com/gekomad/doobie-recipes/blob/master/src/test/scala/ddl/Vacuum.scala)
 
 - Transactions

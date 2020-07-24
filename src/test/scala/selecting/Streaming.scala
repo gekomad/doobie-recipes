@@ -15,7 +15,7 @@ class Streaming extends AnyFunSuite {
         .transact(xa)
     }
 
-    val res: immutable.Seq[Country] = mySelect.unsafeRunSync.take(3)
+    val res: immutable.Seq[Country] = mySelect.unsafeRunSync().take(3)
 
     assert(
       res == List(

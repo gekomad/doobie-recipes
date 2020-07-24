@@ -6,8 +6,8 @@ import scala.collection.immutable
 import org.scalatest.funsuite.AnyFunSuite
 
 /**
- * Select data and populate the type A
- */
+  * Select data and populate the type A
+  */
 class GenericSelect extends AnyFunSuite {
 
   test("generic select") {
@@ -22,7 +22,7 @@ class GenericSelect extends AnyFunSuite {
             .to[List]
             .transact(xa)
         }
-        .unsafeRunSync
+        .unsafeRunSync()
         .take(3)
     }
 

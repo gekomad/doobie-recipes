@@ -23,7 +23,7 @@ class Join extends AnyFunSuite {
     }
 
     assert(
-      join.unsafeRunSync.take(2) == List(
+      join.unsafeRunSync().take(2) == List(
         (Country("Zimbabwe", "ZWE"), Some(City("Harare", "Harare"))),
         (Country("Zambia", "ZMB"), Some(City("Lusaka", "Lusaka")))
       )

@@ -19,7 +19,7 @@ class BiggerThan extends AnyFunSuite {
             .to[List]
             .transact(xa)
         }
-        .unsafeRunSync
+        .unsafeRunSync()
         .take(2)
 
     val mySelect = biggerThan(150000000)

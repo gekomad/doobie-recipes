@@ -12,7 +12,7 @@ class ErrorHandling extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync
+  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
 
   case class Person(id: Int, name: String)
 
@@ -30,9 +30,11 @@ class ErrorHandling extends AnyFunSuite with BeforeAndAfterAll {
         case a => a
       }
 
-    val res = transactor.use { xa =>
-      safeInsert("bob").transact(xa)
-    }.unsafeRunSync
+    val res = transactor
+      .use { xa =>
+        safeInsert("bob").transact(xa)
+      }
+      .unsafeRunSync()
 
     res match {
       case Right(r) => assert(r == Person(1, "bob"))
@@ -44,7 +46,7 @@ class ErrorHandling extends AnyFunSuite with BeforeAndAfterAll {
         .use { xa =>
           safeInsert("bob").transact(xa)
         }
-        .unsafeRunSync
+        .unsafeRunSync()
         .isLeft
     )
   }

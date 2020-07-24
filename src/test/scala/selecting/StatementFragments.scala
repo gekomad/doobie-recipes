@@ -36,7 +36,7 @@ class StatementFragments extends AnyFunSuite {
             .to[List] // ConnectionIO[List[String]]
             .transact(xa) // IO[List[String]]
         }
-        .unsafeRunSync // List[String]
+        .unsafeRunSync() // List[String]
         .take(2) // List[Strings]
 
     }

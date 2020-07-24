@@ -12,7 +12,7 @@ class Count extends AnyFunSuite {
         .transact(xa)
     }
 
-    assert(mySelect.unsafeRunSync == 239)
+    assert(mySelect.unsafeRunSync() == 239)
   }
 
 }

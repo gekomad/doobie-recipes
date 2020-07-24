@@ -20,7 +20,7 @@ class Batch extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync
+  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
 
   test("batch") {
 
@@ -31,6 +31,6 @@ class Batch extends AnyFunSuite with BeforeAndAfterAll {
 
     val data = List[PersonInfo](("Frank", Some(12)), ("Daddy", None))
 
-    transactor.use(xa => insertMany(data).transact(xa)).unsafeRunSync
+    transactor.use(xa => insertMany(data).transact(xa)).unsafeRunSync()
   }
 }

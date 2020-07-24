@@ -13,7 +13,7 @@ class SelectOneColumn extends AnyFunSuite {
         .transact(xa)
     }
 
-    assert(mySelect.unsafeRunSync.take(3) == List("Afghanistan", "Netherlands", "Netherlands Antilles"))
+    assert(mySelect.unsafeRunSync().take(3) == List("Afghanistan", "Netherlands", "Netherlands Antilles"))
   }
 
 }

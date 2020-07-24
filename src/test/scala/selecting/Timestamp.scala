@@ -16,7 +16,7 @@ class Timestamp extends AnyFunSuite {
     val create = sql"CREATE TABLE foo(id SERIAL, date timestamp)".update.run
     val insert = sql"insert into foo (id,date) values (1,$now)".update.run
     val select = sql"select date from foo limit 1".query[LocalDateTime].option
-    val date   = transactor.use(xa => (drop *> create *> insert *> select).transact(xa)).unsafeRunSync
+    val date   = transactor.use(xa => (drop *> create *> insert *> select).transact(xa)).unsafeRunSync()
 
     assert(date.head == now)
 

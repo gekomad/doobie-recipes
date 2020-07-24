@@ -20,7 +20,7 @@ class Logging extends AnyFunSuite {
       }
     }
 
-    assert(byName("U%").unsafeRunSync.take(2) == List(("United Arab Emirates", "ARE"), ("United Kingdom", "GBR")))
+    assert(byName("U%").unsafeRunSync().take(2) == List(("United Arab Emirates", "ARE"), ("United Kingdom", "GBR")))
   }
 
   test("implicit logging") {
@@ -39,7 +39,7 @@ class Logging extends AnyFunSuite {
       }
     }
 
-    assert(byName("U%").unsafeRunSync.take(2) == List(("United Arab Emirates", "ARE"), ("United Kingdom", "GBR")))
+    assert(byName("U%").unsafeRunSync().take(2) == List(("United Arab Emirates", "ARE"), ("United Kingdom", "GBR")))
   }
 
 }

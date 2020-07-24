@@ -57,7 +57,7 @@ class SpoolParameterized extends AnyFunSuite {
     }
     a1.compile.drain.as(ExitCode.Success).unsafeRunSync()
     val f     = scala.io.Source.fromFile(fileName)
-    val lines = f.getLines.mkString("\n")
+    val lines = f.getLines().mkString("\n")
     f.close()
     assert(
       lines ==

@@ -17,7 +17,7 @@ class SQLArrays extends AnyFunSuite with BeforeAndAfterAll {
     *  name VARCHAR   NOT NULL UNIQUE,
     *  pets VARCHAR[] NOT NULL)
     */
-  override def beforeAll(): Unit = dropCreateTablePersonPets().unsafeRunSync
+  override def beforeAll(): Unit = dropCreateTablePersonPets().unsafeRunSync()
 
   test("SQL Arrays") {
 
@@ -30,13 +30,21 @@ class SQLArrays extends AnyFunSuite with BeforeAndAfterAll {
       sql"insert into person_pets (name, pets) values ($name, $pets)".update
         .withUniqueGeneratedKeys("id", "name", "pets")
 
-    assert(transactor.use { xa =>
-      insert("Bob", List("Nixon", "Slappy")).transact(xa)
-    }.unsafeRunSync == Person(1, "Bob", List("Nixon", "Slappy")))
+    assert(
+      transactor
+        .use { xa =>
+          insert("Bob", List("Nixon", "Slappy")).transact(xa)
+        }
+        .unsafeRunSync() == Person(1, "Bob", List("Nixon", "Slappy"))
+    )
 
-    assert(transactor.use { xa =>
-      insert("Alice", List.empty).transact(xa)
-    }.unsafeRunSync == Person(2, "Alice", List.empty))
+    assert(
+      transactor
+        .use { xa =>
+          insert("Alice", List.empty).transact(xa)
+        }
+        .unsafeRunSync() == Person(2, "Alice", List.empty)
+    )
 
   }
 

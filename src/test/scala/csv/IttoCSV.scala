@@ -7,9 +7,8 @@ import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
 
 /**
- * Select data populate List[A] and convert it to CSV using IttoCSV
- */
-
+  * Select data populate List[A] and convert it to CSV using IttoCSV
+  */
 class IttoCSV extends AnyFunSuite {
 
   case class Country(code: String, name: String, pop: Int, gnp: Option[Double])
@@ -27,7 +26,7 @@ class IttoCSV extends AnyFunSuite {
             .to[List]
             .transact(xa)
         }
-        .unsafeRunSync
+        .unsafeRunSync()
         .take(3)
 
     val o: List[Country] = mySelect[Country]

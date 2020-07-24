@@ -17,7 +17,7 @@ class InsertReadPerson extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync
+  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
 
   import doobie.implicits._
 
@@ -29,7 +29,7 @@ class InsertReadPerson extends AnyFunSuite with BeforeAndAfterAll {
       sql"insert into person (name, age) values ($name, $age)".update
         .withUniqueGeneratedKeys("id", "name", "age")
 
-    val elvis = transactor.use(xa => insertAndRead("Elvis", None).transact(xa)).unsafeRunSync
+    val elvis = transactor.use(xa => insertAndRead("Elvis", None).transact(xa)).unsafeRunSync()
 
     assert(elvis == Person(1, "Elvis", None))
   }

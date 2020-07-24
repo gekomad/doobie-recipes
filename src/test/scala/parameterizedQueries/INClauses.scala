@@ -1,6 +1,5 @@
 package parameterizedQueries
 import doobierecipes.Transactor._
-import doobie.implicits._
 import org.scalatest.funsuite.AnyFunSuite
 
 class INClauses extends AnyFunSuite {
@@ -30,7 +29,7 @@ class INClauses extends AnyFunSuite {
           .to[List]
           .transact(xa)
       }
-      .unsafeRunSync
+      .unsafeRunSync()
       .take(2)
 
     assert(

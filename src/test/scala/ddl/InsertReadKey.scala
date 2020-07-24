@@ -21,13 +21,11 @@ class InsertReadKey extends AnyFunSuite with BeforeAndAfterAll {
   override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
 
   test("insert and read key") {
-
     def insertAndReadId(name: String, age: Option[Short]): ConnectionIO[Int] =
       sql"insert into person (name, age) values ($name, $age)".update
         .withUniqueGeneratedKeys("id")
 
-    val id = transactor.use(xa => insertAndReadId("Jack", None).transact(xa)).unsafeRunSync
-
+    val id = transactor.use(xa => insertAndReadId("Jack", None).transact(xa)).unsafeRunSync()
     assert(id == 1)
   }
 

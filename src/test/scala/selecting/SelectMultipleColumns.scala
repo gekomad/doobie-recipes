@@ -6,7 +6,6 @@ import scala.collection.immutable
 
 class SelectMultipleColumns extends AnyFunSuite {
 
-
   test("select multiple columns") {
 
     val mySelect: immutable.Seq[(String, String, Int, Option[Double])] = transactor
@@ -16,7 +15,7 @@ class SelectMultipleColumns extends AnyFunSuite {
           .to[List] // ConnectionIO[List[(String, String, Int, Option[Double])]]
           .transact(xa) // IO[List[(String, String, Int, Option[Double])]]
       }
-      .unsafeRunSync // List[(String, String, Int, Option[Double])]
+      .unsafeRunSync() // List[(String, String, Int, Option[Double])]
       .take(3) // List[(String, String, Int, Option[Double])]
 
     assert(

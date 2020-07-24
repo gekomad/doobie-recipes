@@ -17,7 +17,7 @@ class NestedClassMap extends AnyFunSuite {
           .transact(xa) // IO[List[(Code, Country)]]
       }
       .map(_.toMap) //IO[Map[Code, Country]]
-      .unsafeRunSync // IO[Map[Code, Country]]
+      .unsafeRunSync() // IO[Map[Code, Country]]
 
     assert(mySelect == Map(Code("ABW") -> Country("Aruba", 103000, Some(828.00))))
   }

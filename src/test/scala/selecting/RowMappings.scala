@@ -16,7 +16,7 @@ class RowMappings extends AnyFunSuite {
           .to[List] // ConnectionIO[List[String :: String :: Int :: Option[Double] :: HNil]]
           .transact(xa) // IO[List[String :: String :: Int :: Option[Double] :: HNil]]
       }
-      .unsafeRunSync // List[String :: String :: Int :: Option[Double] :: HNil]]
+      .unsafeRunSync() // List[String :: String :: Int :: Option[Double] :: HNil]]
       .take(3) // List[String :: String :: Int :: Option[Double] :: HNil]]
 
     assert(
@@ -27,6 +27,5 @@ class RowMappings extends AnyFunSuite {
       )
     )
   }
-
 
 }

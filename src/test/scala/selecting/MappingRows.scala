@@ -15,7 +15,7 @@ class MappingRows extends AnyFunSuite {
           .to[List]
           .transact(xa)
       }
-      .unsafeRunSync
+      .unsafeRunSync()
       .take(3)
 
     assert(

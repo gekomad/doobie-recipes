@@ -12,7 +12,7 @@ class Enum extends AnyFunSuite with BeforeAndAfterAll {
     * id   int,
     * product_type VARCHAR NOT NULL)
     */
-  override def beforeAll(): Unit = dropCreateTableTableEnum().unsafeRunSync
+  override def beforeAll(): Unit = dropCreateTableTableEnum().unsafeRunSync()
 
   object ProductType extends Enumeration {
     type ProductType = Value
@@ -38,18 +38,24 @@ class Enum extends AnyFunSuite with BeforeAndAfterAll {
     def insert1(id: Int, productType: ProductType.Value): Update0 =
       sql"insert into table_enum (id, product_type) values ($id, $productType)".update
 
-    assert(transactor.use { xa =>
-      insert1(1, ProductType.FOO).run.transact(xa)
-    }.unsafeRunSync == 1)
+    assert(
+      transactor
+        .use { xa =>
+          insert1(1, ProductType.FOO).run.transact(xa)
+        }
+        .unsafeRunSync() == 1
+    )
 
     //read
     {
-      val mySelect = transactor.use { xa =>
-        sql"select id, product_type from table_enum"
-          .query[TableEnum]
-          .to[List]
-          .transact(xa)
-      }.unsafeRunSync
+      val mySelect = transactor
+        .use { xa =>
+          sql"select id, product_type from table_enum"
+            .query[TableEnum]
+            .to[List]
+            .transact(xa)
+        }
+        .unsafeRunSync()
 
       assert(mySelect == List(TableEnum(1, ProductType.FOO)))
     }

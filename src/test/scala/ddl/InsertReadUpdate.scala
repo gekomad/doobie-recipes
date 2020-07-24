@@ -19,7 +19,7 @@ class InsertReadUpdate extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync
+  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
 
   case class Person(id: Long, name: String, age: Option[Short])
 
@@ -28,18 +28,20 @@ class InsertReadUpdate extends AnyFunSuite with BeforeAndAfterAll {
     def insert1(name: String, age: Option[Short]): Update0 =
       sql"insert into person (name, age) values ($name, $age)".update
 
-    transactor.use(xa => insert1("Alice", Some(12)).run.transact(xa)).unsafeRunSync
+    transactor.use(xa => insert1("Alice", Some(12)).run.transact(xa)).unsafeRunSync()
 
-    transactor.use(xa => insert1("Bob", None).run.transact(xa)).unsafeRunSync
+    transactor.use(xa => insert1("Bob", None).run.transact(xa)).unsafeRunSync()
 
     //read
 
-    val mySelect: immutable.Seq[Person] = transactor.use { xa =>
-      sql"select id, name, age from person order by name"
-        .query[Person]
-        .to[List]
-        .transact(xa)
-    }.unsafeRunSync
+    val mySelect: immutable.Seq[Person] = transactor
+      .use { xa =>
+        sql"select id, name, age from person order by name"
+          .query[Person]
+          .to[List]
+          .transact(xa)
+      }
+      .unsafeRunSync()
 
     assert(mySelect == List(Person(1, "Alice", Some(12)), Person(2, "Bob", None)))
 

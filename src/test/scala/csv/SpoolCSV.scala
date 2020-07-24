@@ -2,7 +2,6 @@ package csv
 
 import java.nio.file.StandardOpenOption
 import cats.effect.Blocker
-import cats.implicits._
 import doobierecipes.Transactor._
 import doobierecipes.Util
 import fs2.Stream
@@ -50,10 +49,10 @@ class SpoolCSV extends AnyFunSuite {
       } yield ()
     }
 
-    x.map(_.unsafeRunSync).compile.drain.unsafeRunSync
+    x.map(_.unsafeRunSync()).compile.drain.unsafeRunSync()
 
     val f     = scala.io.Source.fromFile(fileName)
-    val lines = f.getLines.mkString("\n")
+    val lines = f.getLines().mkString("\n")
     f.close()
 
     assert(
