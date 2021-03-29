@@ -1,7 +1,6 @@
 package csv
 
 import java.nio.file.StandardOpenOption
-import cats.implicits._
 import doobierecipes.Util._
 import fs2.Stream
 import org.scalatest.funsuite.AnyFunSuite

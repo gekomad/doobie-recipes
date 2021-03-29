@@ -1,8 +1,8 @@
 name := "doobie-recipes"
 
-version := "0.6.5"
+version := "0.6.6"
 
-scalaVersion := "2.13.3"
+scalaVersion := "2.13.5"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -21,18 +21,18 @@ scalacOptions ++= Seq(
   "-Xlint:option-implicit", // Option.apply used implicit view.
   "-Xlint:package-object-classes", // Class or object defined in package object.
   "-explaintypes", // Explain type errors in more detail.
-  "-Xfatal-warnings",
+//  "-Xfatal-warnings",
   "-Ywarn-unused"
 )
 
-lazy val doobieVersion = "0.9.0"
+lazy val doobieVersion = "0.12.1"
 
 libraryDependencies ++= Seq(
   "org.tpolecat"        %% "doobie-core"      % doobieVersion,
   "org.tpolecat"        %% "doobie-postgres"  % doobieVersion,
   "org.tpolecat"        %% "doobie-hikari"    % doobieVersion,
   "com.github.gekomad"  %% "itto-csv"         % "1.1.1",
-  "org.scalatest"       %% "scalatest"        % "3.3.0-SNAP2"      % Test
+  "org.scalatest"       %% "scalatest"        % "3.3.0-SNAP3"      % Test
 )
 
 parallelExecution in Test := false
