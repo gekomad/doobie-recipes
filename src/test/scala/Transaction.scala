@@ -4,6 +4,7 @@ import doobie.free.connection
 import doobie.hikari.HikariTransactor
 import org.scalatest.funsuite.AnyFunSuite
 import doobierecipes.Transactor._
+import cats.effect.unsafe.implicits.global
 
 class Transaction extends AnyFunSuite {
 

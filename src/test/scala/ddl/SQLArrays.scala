@@ -5,6 +5,7 @@ import doobierecipes.Util._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 import doobie.postgres.implicits._
+import cats.effect.unsafe.implicits.global
 
 /**
   * store a List[String] in an postgreSQL Array

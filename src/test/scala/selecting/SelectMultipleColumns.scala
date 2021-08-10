@@ -1,7 +1,7 @@
 import doobie.implicits._
 import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
-
+import cats.effect.unsafe.implicits.global
 import scala.collection.immutable
 
 class SelectMultipleColumns extends AnyFunSuite {

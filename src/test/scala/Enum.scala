@@ -4,6 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import doobie.util.{Get, Put}
 import doobierecipes.Util._
 import org.scalatest.BeforeAndAfterAll
+import cats.effect.unsafe.implicits.global
 
 class Enum extends AnyFunSuite with BeforeAndAfterAll {
 

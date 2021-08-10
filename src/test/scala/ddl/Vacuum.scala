@@ -4,6 +4,7 @@ import doobierecipes.Transactor._
 import doobierecipes.Util._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.unsafe.implicits.global
 
 class Vacuum extends AnyFunSuite with BeforeAndAfterAll {
 

@@ -3,6 +3,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import doobierecipes.Util._
 import doobierecipes.Transactor._
 import org.scalatest.BeforeAndAfterAll
+import cats.effect.unsafe.implicits.global
 
 class ErrorHandling extends AnyFunSuite with BeforeAndAfterAll {
 

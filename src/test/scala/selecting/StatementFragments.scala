@@ -4,6 +4,7 @@ import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.immutable
+import cats.effect.unsafe.implicits.global
 
 class StatementFragments extends AnyFunSuite {
 

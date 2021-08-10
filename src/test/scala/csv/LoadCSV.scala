@@ -2,8 +2,9 @@ package csv
 
 import com.github.gekomad.ittocsv.core.ParseFailure
 import doobierecipes.Util._
-import fs2.Stream
 import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.unsafe.implicits.global
+import fs2.io.file.Files
 
 /**
   *
@@ -18,17 +19,12 @@ class LoadCSV extends AnyFunSuite {
   test("create csv file on disk, read it and insert in table using itto-csv") {
     object ReadCsvAndWriteDB {
 
-      import java.nio.file.Paths
-
       import cats.data.NonEmptyList
-      import cats.effect.{ContextShift, IO}
+      import cats.effect.IO
       import com.github.gekomad.ittocsv.core.Header.FieldNames
       import com.github.gekomad.ittocsv.core.Schema
       import com.github.gekomad.ittocsv.parser.IttoCSVFormat
-      import fs2.{io, text}
-
-      implicit val ioContextShift: ContextShift[IO] =
-        IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
+      import fs2.text
 
       import cats.implicits._
       import doobie.implicits._
@@ -45,7 +41,6 @@ class LoadCSV extends AnyFunSuite {
         inOutFile: String,
         sql: String
       ): IO[Unit] = {
-        import cats.effect.Blocker
         import cats.instances.list._
         import cats.syntax.traverse._
         def bulkInsert[A: doobie.util.Read: doobie.util.Write: FieldNames: Schema](
@@ -72,28 +67,22 @@ class LoadCSV extends AnyFunSuite {
           }
         }
 
-        val a = Stream.resource(Blocker[IO]).flatMap { blocker =>
-          io.file
-            .readAll[IO](Paths.get(inOutFile), blocker, 4096)
-            .through(text.utf8Decode)
-            .through(text.lines)
-            .chunkN(maxRowsToCommit)
-            .zipWithIndex
-            .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync()))
+        val a = Files[IO]
+          .readAll(fs2.io.file.Path(inOutFile))
+          .through(text.utf8.decode)
+          .through(text.lines)
+          .chunkN(maxRowsToCommit)
+          .zipWithIndex
+          .map(chunk => bulkInsert[B](chunk._1.toList, chunk._2).map(_.unsafeRunSync()))
 
-        }
         a.compile.drain
 
       }
     }
 
     import java.nio.file.Paths
-
-    import cats.effect.{ContextShift, IO}
     import com.github.gekomad.ittocsv.parser.IttoCSVFormat
     import doobierecipes.RandomUtil._
-
-    implicit val ioContextShift: ContextShift[IO] = IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
 
     import cats.implicits._
     import doobie.implicits._

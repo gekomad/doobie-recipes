@@ -5,7 +5,8 @@ import org.scalatest.funsuite.AnyFunSuite
 import java.time.LocalDateTime
 import doobie.implicits._
 import cats.implicits._
-import doobie.implicits.javatime._
+import cats.effect.unsafe.implicits.global
+import doobie.implicits.javatimedrivernative._
 
 class Timestamp extends AnyFunSuite {
 

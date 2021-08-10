@@ -1,6 +1,7 @@
 package parameterizedQueries
 import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.unsafe.implicits.global
 
 class INClauses extends AnyFunSuite {
 

@@ -8,6 +8,7 @@ import cats.implicits._
 import doobie.implicits._
 import doobie.util.update.Update
 import org.scalatest.BeforeAndAfterAll
+import cats.effect.unsafe.implicits.global
 
 /**
   * performs a batch insert

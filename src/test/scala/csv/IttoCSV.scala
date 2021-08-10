@@ -5,6 +5,7 @@ import doobie.implicits._
 import doobie.util.Read
 import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.unsafe.implicits.global
 
 /**
   * Select data populate List[A] and convert it to CSV using IttoCSV

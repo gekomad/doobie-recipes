@@ -1,6 +1,7 @@
 import doobierecipes.Transactor._
 import cats.effect.IO
 import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.unsafe.implicits.global
 
 class Logging extends AnyFunSuite {
 

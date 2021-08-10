@@ -4,6 +4,7 @@ import doobie.implicits._
 import doobie.util.Read
 import scala.collection.immutable
 import org.scalatest.funsuite.AnyFunSuite
+import cats.effect.unsafe.implicits.global
 
 /**
   * Select data and populate the type A
