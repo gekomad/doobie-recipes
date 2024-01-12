@@ -19,7 +19,10 @@ class InsertReadKey extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
+  override def beforeAll(): Unit = {
+    dropCreateTablePerson().unsafeRunSync()
+    ()
+  }
 
   test("insert and read key") {
     def insertAndReadId(name: String, age: Option[Short]): ConnectionIO[Int] =

@@ -2,7 +2,7 @@ name := "doobie-recipes"
 
 version := "1.0.0"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.12"
 
 scalacOptions ++= Seq(
   "-deprecation",
@@ -22,10 +22,11 @@ scalacOptions ++= Seq(
   "-Xlint:option-implicit", // Option.apply used implicit view.
   "-Xlint:package-object-classes", // Class or object defined in package object.
   "-explaintypes", // Explain type errors in more detail.
+  "-Wvalue-discard",
   "-Ywarn-unused"
 )
 
-val doobieVersion = "1.0.0-M5"
+val doobieVersion = "1.0.0-RC1"
 
 libraryDependencies ++= Seq(
   "org.tpolecat"       %% "doobie-core"     % doobieVersion,
@@ -35,4 +36,4 @@ libraryDependencies ++= Seq(
   "org.scalatest"      %% "scalatest"       % "3.3.0-SNAP3" % Test
 )
 
-parallelExecution in Test := false
+Test / parallelExecution := false

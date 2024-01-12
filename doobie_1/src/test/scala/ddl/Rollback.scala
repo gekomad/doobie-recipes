@@ -16,7 +16,10 @@ class Rollback extends AnyFunSuite with BeforeAndAfterAll {
     * name VARCHAR NOT NULL UNIQUE,
     * age  SMALLINT)
     */
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
+  override def beforeAll(): Unit = {
+    dropCreateTablePerson().unsafeRunSync()
+    ()
+  }
 
   test("rollback") {
     import doobie.util.transactor.Transactor

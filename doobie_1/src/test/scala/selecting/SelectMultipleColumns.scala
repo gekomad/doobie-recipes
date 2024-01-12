@@ -1,10 +1,25 @@
+import cats.effect.IO
 import doobie.implicits._
 import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
 import cats.effect.unsafe.implicits.global
+import cats.~>
+import doobie.WeakAsync
+import doobie.free.connection.ConnectionIO
 import scala.collection.immutable
 
 class SelectMultipleColumns extends AnyFunSuite {
+
+  test("IO to ConnectionIO") {
+    val x: IO[Int] = IO(1)
+    val res = WeakAsync.liftK[IO, ConnectionIO].use { toConnectionIO: (IO ~> ConnectionIO) =>
+      val aa: ConnectionIO[Int] = toConnectionIO(x)
+      val p: IO[Int]            = transactor.use(xa => aa.transact(xa))
+      p
+    }
+    val aa = res.unsafeRunSync()
+    println(aa)
+  }
 
   test("select multiple columns") {
 

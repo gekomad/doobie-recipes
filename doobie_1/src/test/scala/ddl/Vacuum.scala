@@ -8,7 +8,10 @@ import cats.effect.unsafe.implicits.global
 
 class Vacuum extends AnyFunSuite with BeforeAndAfterAll {
 
-  override def beforeAll(): Unit = dropCreateTablePerson().unsafeRunSync()
+  override def beforeAll(): Unit = {
+    dropCreateTablePerson().unsafeRunSync()
+    ()
+  }
 
   test("vacuum") {
 

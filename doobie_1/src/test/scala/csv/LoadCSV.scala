@@ -43,6 +43,7 @@ class LoadCSV extends AnyFunSuite {
       ): IO[Unit] = {
         import cats.instances.list._
         import cats.syntax.traverse._
+
         def bulkInsert[A: doobie.util.Read: doobie.util.Write: FieldNames: Schema](
           csvList: List[String],
           count: Long

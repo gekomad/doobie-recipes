@@ -13,7 +13,10 @@ class Enum extends AnyFunSuite with BeforeAndAfterAll {
     * id   int,
     * product_type VARCHAR NOT NULL)
     */
-  override def beforeAll(): Unit = dropCreateTableTableEnum().unsafeRunSync()
+  override def beforeAll(): Unit = {
+    dropCreateTableTableEnum().unsafeRunSync()
+    ()
+  }
 
   object ProductType extends Enumeration {
     type ProductType = Value

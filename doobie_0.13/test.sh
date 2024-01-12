@@ -14,6 +14,6 @@ echo "start doobie_recipies docker image..."
 docker run -d --name doobie_recipies -p5435:5432 -e POSTGRES_USER=postgres -e POSTGRES_DB=world -e POSTGRES_PASSWORD=postgres tpolecat/skunk-world
 sleep 5
 echo "test..."
-sbt test
+sbt clean test
 echo "stop doobie_recipies docker image..."
 docker rm -f doobie_recipies

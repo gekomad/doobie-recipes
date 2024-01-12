@@ -18,7 +18,10 @@ class SQLArrays extends AnyFunSuite with BeforeAndAfterAll {
     *  name VARCHAR   NOT NULL UNIQUE,
     *  pets VARCHAR[] NOT NULL)
     */
-  override def beforeAll(): Unit = dropCreateTablePersonPets().unsafeRunSync()
+  override def beforeAll(): Unit = {
+    dropCreateTablePersonPets().unsafeRunSync()
+    ()
+  }
 
   test("SQL Arrays") {
 

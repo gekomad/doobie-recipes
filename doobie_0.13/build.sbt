@@ -1,8 +1,8 @@
 name := "doobie-recipes"
 
-version := "0.6.7"
+version := "0.7.0"
 
-scalaVersion := "2.13.6"
+scalaVersion := "2.13.12"
 
 scalacOptions ++= Seq(
   "-deprecation",

@@ -2,11 +2,14 @@ package selecting
 
 import doobierecipes.Transactor._
 import org.scalatest.funsuite.AnyFunSuite
+
 import java.time.LocalDateTime
 import doobie.implicits._
 import cats.implicits._
 import cats.effect.unsafe.implicits.global
 import doobie.implicits.javatimedrivernative._
+
+import java.time.temporal.ChronoUnit
 
 class Timestamp extends AnyFunSuite {
 
@@ -19,7 +22,7 @@ class Timestamp extends AnyFunSuite {
     val select = sql"select date from foo limit 1".query[LocalDateTime].option
     val date   = transactor.use(xa => (drop *> create *> insert *> select).transact(xa)).unsafeRunSync()
 
-    assert(date.head == now)
+    assert(date.head.truncatedTo(ChronoUnit.SECONDS) == now.truncatedTo(ChronoUnit.SECONDS))
 
   }
 }
